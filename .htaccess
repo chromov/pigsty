@@ -1,0 +1,17 @@
+RewriteEngine On
+
+# don't try to rewrite already rewritten queries
+RewriteRule ^dispatcher.php - [L]
+RewriteRule ^public/ - [L]
+
+# file from public folder goes through
+RewriteCond %{DOCUMENT_ROOT}public%{REQUEST_URI} -f
+RewriteRule ^.*$ public%{REQUEST_URI} [L]
+
+# we don't want to lose a query string
+RewriteCond  %{QUERY_STRING}  !^$
+RewriteRule ^(.*)$ dispatcher.php?URI__=$1\&%{QUERY_STRING} [L]
+
+# all requests goes to dispatcher
+RewriteRule ^(.*)$ dispatcher.php?URI__=$1 [L]
+

@@ -39,7 +39,7 @@ class Controller {
    * @return void
    */
   public function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
-    echo "<a href=".Routing::path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
+    "<a href=".Router::path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
   }
 
 }

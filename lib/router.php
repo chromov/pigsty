@@ -231,15 +231,77 @@ class Router {
    * Parses $URI parameter and stores the result in $result_parameters
    * 
    * @param String $URI String to be parsed
+   * @param string $method HTTP request method
    * @access public
    * @return array
    */
-  public function parse_URI($URI) {
+  public function parse_URI($URI, $method = "get") {
     if ($URI == "") {
       return false;
     }
-    $this->result_parameters = array();
-    return $this->result_parameters;
+
+    $matches = array();
+
+    foreach($this->result_routes as $route_array) {
+      $route_regexp = $this->regexpify($route_array['route']);
+      //print($route_regexp."\n");
+      if (preg_match($route_regexp, $URI, $matches) && $route_array['method'] == $method) {
+        $this->result_parameters = array_merge($this->extract_hash($matches), $route_array);
+        return $this->result_parameters;
+      }
+    }
+  }
+
+  /**
+   * extract_hash 
+   * 
+   * @param array $input_array 
+   * @access private
+   * @return array
+   */
+  private function extract_hash($input_array) {
+    $res_array = array();
+    foreach ($input_array as $key => $val) {
+      if (!preg_match('/^\d+$/', $key)) {
+        $res_array[$key] = $val;
+      }
+    }
+    return $res_array;
+  }
+
+  /**
+   * regexpify 
+   * 
+   * @param string $route 
+   * @access private
+   * @return string
+   */
+  private function regexpify($route) {
+    if (preg_match('/{\w+:\w+}/', $route)) {
+      $res = preg_replace_callback('/{(?<name>\w+):(?<type>\w+)}/', array($this, 'replace_variables'), $route);
+    } else {
+      $res = $route;
+    }
+    return "/^".addcslashes($res, "/")."$/";
+  }
+
+  /**
+   * replace_variables 
+   * 
+   * @param array $matches 
+   * @access private
+   * @return string
+   */
+  private function replace_variables($matches) {
+    switch ($matches['type']) {
+      case "int":
+        $regxp = "\d+";
+        break;
+      case "str":
+        $regxp = "\w+";
+        break;
+    }
+    return "(?<".$matches['name'].">".$regxp.")";
   }
 
   /**

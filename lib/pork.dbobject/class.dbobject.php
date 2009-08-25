@@ -1,7 +1,7 @@
 <?php
 /**
  * 
- *	Pork.dObject version 1.3.1 
+ *	Pork.dObject version 1.3.2 
  *	By Jelle Ursem
  *	see http://code.google.com/p/pork-dbobject/ for more info
  *	
@@ -22,7 +22,7 @@ define('RELATION_CUSTOM', 'RELATION_CUSTOM');
  * 
  * @package Pork
  * @author Jelle Ursem
- * @copyright Belfabriek 2009
+ * @copyright Jelle Ursem 2009
  * @version 1.3.1
  * @access public
  */
@@ -173,7 +173,7 @@ class dbObject
 			$insertValues = 'null';
 		}
 		if (sizeof($this->changedValues) > 0) { // do we have any new-set values?
-			$filteredValues = PostFilter::nl2mysql($this->changedValues);
+			$filteredValues = $this->changedValues; // quick fix until v1.4
 			$insertfields .= ', '.implode(",", array_keys($filteredValues));
 			foreach ($filteredValues as $property=>$value) { // append each value escaped to the query
 				$insertValues .= ", '".dbConnection::getInstance($this->databaseInfo->connection)->escapeValue($value)."'";
@@ -202,7 +202,7 @@ class dbObject
 		}
 		elseif ($this->changedValues != false) { // otherwise just build the update query
 			$updateQuery = "";
-			$filteredValues = PostFilter::nl2mysql($this->changedValues);
+			$filteredValues = $this->changedValues; // quick fix until v1.4
 			foreach ($filteredValues as $property=>$value) {
 				$updateQuery .= ($updateQuery != '') ? ', ' : '';
 				$updateQuery .= ($value != '') ? " {$property} = '".dbConnection::getInstance($this->databaseInfo->connection)->escapeValue($value)."'" : "{$property} = NULL";
@@ -437,7 +437,7 @@ class dbObject
 	 * @param array $values Database values to fill this object with
 	 */
 	public function Import($values) { 
-		$this->databaseValues = PostFilter::mysql2nl($values);
+		$this->databaseValues = $values;
 		$this->databaseInfo->ID = (!empty($values[$this->databaseInfo->primary])) ? $values[$this->databaseInfo->primary] : false;
 	}
 	
@@ -590,7 +590,7 @@ class dbObject
  * 
  * @package Pork
  * @author Jelle Ursem
- * @copyright Belfabriek 2009
+ * @copyright Jelle Ursem 2009
  * @version 1.0
  * @access public
  */

@@ -325,7 +325,22 @@ class Router {
    * @return string
    */
   public function path_to($route_name, $fixed_params=array(), $query_params=array()) {
-    return "/generated/path/";
+    if(isset($this->result_routes[$route_name])) {
+      $route = $this->result_routes[$route_name]['route'];
+      foreach ($fixed_params as $key => $value) {
+        $route = preg_replace("/\{$key:\w+\}/", $value, $route);
+      }
+      if (count($query_params) > 0) {
+        $pairs = array();
+        foreach ($query_params as $key => $value) {
+          $pairs[] = "$key=$value";
+        }
+        $route = $route."?".implode("&", $pairs);
+      }
+      return $route;
+    } else {
+      return "";
+    }
   }
 }
 

@@ -250,6 +250,7 @@ class Router {
         return $this->result_parameters;
       }
     }
+    return false;
   }
 
   /**

@@ -30,6 +30,10 @@ if(!function_exists('get_called_class')) {
   array_walk(glob('./models/*.php'),create_function('$v,$i', 'return require_once($v);')); 
 
   $__params = Router::load()->parse_URI($_GET['URI__'], strtolower($_SERVER['REQUEST_METHOD']));
+  if ($__params === false) {
+    throw new Exception("No route");
+  }
+
   foreach ($_POST as $key => $val) {
     if (!array_key_exists($key, $__params)) $__params[$key] = $val;
   }

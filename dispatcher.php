@@ -1,7 +1,8 @@
 <?php
 
   array_walk(glob('./lib/*.php'),create_function('$v,$i', 'return require_once($v);')); 
-  require_once('./config/routes.php');
+  array_walk(glob('./config/*.php'),create_function('$v,$i', 'return require_once($v);')); 
+  array_walk(glob('./models/*.php'),create_function('$v,$i', 'return require_once($v);')); 
 
   $__params = Router::load()->parse_URI($_GET['URI__'], strtolower($_SERVER['REQUEST_METHOD']));
   foreach ($_POST as $key => $val) {

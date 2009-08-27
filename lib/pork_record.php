@@ -61,7 +61,8 @@ class PorkRecord extends dbObject {
   public function find_by_class_name($className, $filters=array(), $extra=array(), $justThese=array()) {
 		$builder = new QueryBuilder($className, $filters, $extra, $justThese);
 		$input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
-		return(dbObject::importArray($className, $input));
+    $results = dbObject::importArray($className, $input);
+		return($results != false ? $results : array());
   }
 
   /**

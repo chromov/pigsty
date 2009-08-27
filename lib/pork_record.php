@@ -2,8 +2,8 @@
 
 require_once "lib/pork.dbobject/class.settings.php";
 require_once "lib/pork.dbobject/class.dbconnection.php";
-require_once "lib/pork.dbobject/class.logger.php";
 require_once "lib/pork.dbobject/class.dbobject.php";
+require_once "lib/pork.dbobject/class.logger.php";
 
 class PorkRecord extends dbObject {
 
@@ -26,7 +26,7 @@ class PorkRecord extends dbObject {
         $filters["ID"] = $this->ID;
         $filters = array(get_class($this) => $filters);	
       }
-      $this->find_by_class_name($class_name, $filters, $args[1], $args[2])
+      $this->find_by_class_name($class_name, $filters, $args[1], $args[2]);
     } else {
       throw new Exception("No relation $name in model ".get_class($this));
     }
@@ -43,7 +43,7 @@ class PorkRecord extends dbObject {
    * @return mixed
    */
   static public function find($filters=array(), $extra=array(), $just_these=array()) {
-    $class_name = __CLASS__;
+    $class_name = get_called_class();
     $obj = new $class_name();
     return($obj->find_by_class_name($class_name, $filters, $extra, $just_these));
   }

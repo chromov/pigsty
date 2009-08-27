@@ -35,7 +35,7 @@ class Settings {
 	 * Singleton functionality that creates one instance per loaded settings file so that ini parsing needs to happen only once.
 	 * @param string $settingsfile file to read for settings
 	 */
-	public static function Load($settingsfile= './settings/settings.ini')
+	public static function Load($settingsfile= './lib/pork.dbobject/settings/settings.ini')
 	{
 		static $instances = array();
 		if(!array_key_exists($settingsfile, $instances)) {

@@ -507,7 +507,7 @@ class dbObject
 	 * @uses QueryBuilder to build the actual query
 	 * @returns array a batch of pre-filled objects of $className or false if it finds nothing
 	 */
-	public function Find($className, $filters=array(), $extra=array(), $justThese=array()) 
+	public function _Find($className, $filters=array(), $extra=array(), $justThese=array()) 
 	{
 		$originalClassName = ($className instanceof dbObject) ? get_class($className) : $className;
 		$class = new $originalClassName();

@@ -35,6 +35,8 @@ class Controller {
 
     $this->render_options['module_layout'] = '';
     $this->render_options['facet_layout'] = '';
+
+    $this->before_filter();
   }
 
   /**
@@ -44,6 +46,7 @@ class Controller {
    * @return void
    */
   public function __destruct() {
+    $this->after_filter();
     $base = $_SERVER['DOCUMENT_ROOT']."/";
     $base = str_replace('//', '/', $base);
     $base .= "facets/".$this->params['facet']."/modules/".$this->params['module']."/views/".$this->params['controller']."/";
@@ -65,6 +68,14 @@ class Controller {
 
     //sending it out
     echo $output;
+  }
+
+  protected function before_filter() {
+    
+  }
+
+  protected function after_filter() {
+    
   }
 
   /**

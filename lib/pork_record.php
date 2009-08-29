@@ -19,7 +19,7 @@ class PorkRecord extends dbObject {
    * overloaded __call method handles model relations
    */
   public function __call($name, $args) {
-    $class_name = $this->classify($name);
+    $class_name = Utils::classify($name);
     if($class_name && array_key_exists($class_name, $this->relations)) {
       $filters = $args[0];
       if($this->ID != false) {
@@ -122,17 +122,26 @@ class PorkRecord extends dbObject {
     }
   }
 
-  public static function classify($class_name) {
-    $capital = ucwords($class_name);
-    if(class_exists($capital)) {
-      return $capital;
-    }
-    $sin = ucwords(Inflect::singularize($class_name));
-    if(class_exists($sin)) {
-      return $sin;
-    }
+  /**
+   * PERMISSIONS
+   */
+
+  public function can_be_created() {
     return false;
   }
+
+  public function can_be_edited($field_name="") {
+    return false;
+  }
+
+  public function can_be_viewed($field_name="") {
+    return true;
+  }
+
+  public function can_be_destroyed() {
+    return false;
+  }
+
 
 }
 

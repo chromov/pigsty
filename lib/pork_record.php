@@ -26,7 +26,28 @@ class PorkRecord extends dbObject {
         $filters["ID"] = $this->ID;
         $filters = array(get_class($this) => $filters);	
       }
-      $this->find_by_class_name($class_name, $filters, $args[1], $args[2]);
+      $results = $this->find_by_class_name($class_name, $filters, $args[1], $args[2]);
+
+      if(sizeof($results) > 0) {
+        switch($this->relations[$className]->relationType) {
+        case RELATION_SINGLE:
+          return $results[0];
+          break;
+        case RELATION_FOREIGN:
+					if(array_key_exists($this->databaseInfo->primary, $results[0]->databaseInfo->fields)) {
+            return $results;
+          } elseif(array_key_exists($results[0]->databaseInfo->primary, $this->databaseInfo->fields)) {
+            return $results[0];
+          }
+          break;
+        case RELATION_MANY:
+          return $results;
+          break;
+        default:
+          return array();
+          break;
+        }
+      }
     } else {
       throw new Exception("No relation $name in model ".get_class($this));
     }

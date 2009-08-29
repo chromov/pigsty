@@ -21,35 +21,36 @@ class PorkRecord extends dbObject {
   public function __call($name, $args) {
     $class_name = Utils::classify($name);
     if($class_name && array_key_exists($class_name, $this->relations)) {
-      $filters = $args[0];
+      $filters = $args[0] ? $args[0] : array();
+      $extra = $args[1] ? $args[1] : array();
+      $just_these = $args[2] ? $args[2] : array();
       if($this->ID != false) {
         $filters["ID"] = $this->ID;
         $filters = array(get_class($this) => $filters);	
       }
-      $results = $this->find_by_class_name($class_name, $filters, $args[1], $args[2]);
+      $results = $this->find_by_class_name($class_name, $filters, $extra, $just_these);
 
-      if(sizeof($results) > 0) {
-        switch($this->relations[$className]->relationType) {
-        case RELATION_SINGLE:
-          return $results[0];
-          break;
-        case RELATION_FOREIGN:
-					if(array_key_exists($this->databaseInfo->primary, $results[0]->databaseInfo->fields)) {
-            return $results;
-          } elseif(array_key_exists($results[0]->databaseInfo->primary, $this->databaseInfo->fields)) {
-            return $results[0];
-          }
-          break;
-        case RELATION_MANY:
-          return $results;
-          break;
-        default:
-          return array();
-          break;
+      $this->analyzeRelations();
+      switch($this->relations[$class_name]->relationType) {
+      case RELATION_SINGLE:
+        return(sizeof($results) > 0 ? $results[0] : NULL);
+        break;
+      case RELATION_FOREIGN:
+        if(array_key_exists($this->databaseInfo->primary, $results[0]->databaseInfo->fields)) {
+          return(sizeof($results) > 0 ? $results : array());
+        } elseif(array_key_exists($results[0]->databaseInfo->primary, $this->databaseInfo->fields)) {
+          return(sizeof($results) > 0 ? $results[0] : NULL);
         }
+        break;
+      case RELATION_MANY:
+        return(sizeof($results) > 0 ? $results : array());
+        break;
+      default:
+        return false;
+        break;
       }
     } else {
-      throw new Exception("No relation $name in model ".get_class($this));
+      return false;
     }
   }
 

@@ -23,6 +23,15 @@ class Controller {
    */
   private $render_options = array();
 
+
+  /**
+   * headers_sent 
+   * 
+   * @var boolean
+   * @access private
+   */
+  private $headers_sent = false;
+
   /**
    * __construct 
    * 
@@ -47,6 +56,10 @@ class Controller {
    */
   public function __destruct() {
     $this->after_filter();
+
+    if ($this->headers_sent) {
+      return;
+    }
     $base = $_SERVER['DOCUMENT_ROOT']."/";
     $base = str_replace('//', '/', $base);
     $base .= "facets/".$this->params['facet']."/modules/".$this->params['module']."/views/".$this->params['controller']."/";
@@ -110,6 +123,21 @@ class Controller {
     $result = ob_get_contents();
     ob_end_clean();
     return $result;
+  }
+
+  /**
+   * redirect_to 
+   * 
+   * @param string $route_name 
+   * @param array $fixed_params 
+   * @param array $query_params 
+   * @access public
+   * @return void
+   */
+  public function redirect_to($route_name, $fixed_params=array(), $query_params=array()) {
+    $path = Router::load()->path_to($route_name, $fixed_params, $query_params);
+    header("location: {$path}");
+    $this->headers_sent = true;
   }
 
   /* Helper methods */

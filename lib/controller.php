@@ -12,7 +12,7 @@ class Controller {
    * @var array
    * @access private
    */
-  private $params = array();
+  protected $params = array();
 
   /**
    * render_options 
@@ -21,7 +21,7 @@ class Controller {
    * @var array
    * @access private
    */
-  private $render_options = array();
+  protected $render_options = array();
 
 
   /**
@@ -30,7 +30,7 @@ class Controller {
    * @var boolean
    * @access private
    */
-  private $headers_sent = false;
+  protected $headers_sent = false;
 
   /**
    * __construct 
@@ -111,7 +111,7 @@ class Controller {
    * @access private
    * @return boolean
    */
-  private function render($params = array()) {
+  protected function render($params = array()) {
     foreach ($params as $key => $value) {
       $this->render_options[$key] = $value;
     }
@@ -146,7 +146,7 @@ class Controller {
    * @access public
    * @return void
    */
-  public function redirect_to($route_name, $fixed_params=array(), $query_params=array()) {
+  protected function redirect_to($route_name, $fixed_params=array(), $query_params=array()) {
     $path = Router::load()->path_to($route_name, $fixed_params, $query_params);
     header("location: {$path}");
     $this->headers_sent = true;
@@ -165,7 +165,7 @@ class Controller {
    * @access public
    * @return void
    */
-  public function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
+  protected function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
     "<a href=".Router::load()->path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
   }
 

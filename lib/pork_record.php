@@ -71,6 +71,27 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * find_first 
+   * 
+   * @param array $filters 
+   * @param array $extra 
+   * @param array $just_these 
+   * @static
+   * @access public
+   * @return mixed
+   */
+  static public function find_first($filters=array(), $extra=array(), $just_these=array()) {
+    $class_name = get_called_class();
+    $obj = new $class_name();
+    $results = $obj->find_by_class_name($class_name, $filters, $extra, $just_these);
+
+    if (sizeof($results) > 0) {
+      return $results[0];
+    }
+    return NULL;
+  }
+
+  /**
    * find_by_class_name 
    * 
    * @param string $className 

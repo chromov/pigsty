@@ -338,7 +338,7 @@ class Router {
         }
         $route = $route."?".implode("&", $pairs);
       }
-      return $route;
+      return "/".$route;
     } else {
       return "";
     }

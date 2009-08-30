@@ -44,6 +44,6 @@ if(!function_exists('get_called_class')) {
   require_once("./facets/".$__params['facet']."/modules/".$__params['module']."/controllers/".$__params['controller']."_controller.php");
   $controller_name = ucwords($__params['controller'])."Controller";
   $controller = new $controller_name($__params);
-  call_user_func(array($controller, $__params['action']));
+  call_user_func(array($controller, $__params['action']."_action"));
 
 ?>

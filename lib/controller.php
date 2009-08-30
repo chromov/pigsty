@@ -83,10 +83,22 @@ class Controller {
     echo $output;
   }
 
+  /**
+   * before_filter 
+   * 
+   * @access protected
+   * @return void
+   */
   protected function before_filter() {
-    
+
   }
 
+  /**
+   * after_filter 
+   * 
+   * @access protected
+   * @return void
+   */
   protected function after_filter() {
     
   }

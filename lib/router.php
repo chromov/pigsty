@@ -93,8 +93,17 @@ class Router {
     foreach ($facet_body['modules'] as $module_name => $module_body) {
       $got_routes += $this->parse_module($module_body, $module_name);
     }
+    if (array_key_exists('root', $facet_body)) {
+      $route_body = $facet_body['root'];
+      $route_body['route'] = "";
+      $route_body['facet'] = $facet_name;
+      $root = array($facet_name."_root" => $route_body);
+      $got_routes += $root;
+    }
     foreach ($got_routes as $route_name => $route_body) {
-      if(!$facet_body['default']) { $route_body['route'] = $facet_name."/".$route_body['route']; }
+      if(!$facet_body['default']) {
+        $route_body['route'] = $route_body['route'] == "" ? $facet_name : $facet_name."/".$route_body['route'];
+      }
       $route_body['facet'] = $facet_name;
       $got_routes[$route_name] = $route_body;
     }
@@ -119,7 +128,7 @@ class Router {
       }
     }
     foreach ($got_routes as $route_name => $route_body) {
-      $route_body['route'] = $module_name."/".$route_body['route'];
+      $route_body['route'] = $route_body['route'] == "" ? $module_name : $module_name."/".$route_body['route'];
       $route_body['module'] = $module_name;
       $got_routes[$route_name] = $route_body;
     }
@@ -236,10 +245,6 @@ class Router {
    * @return array
    */
   public function parse_URI($URI, $method = "get") {
-    if ($URI == "") {
-      return false;
-    }
-
     $matches = array();
 
     foreach($this->result_routes as $route_array) {

@@ -137,6 +137,22 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * load 
+   *
+   * TODO it should store only changed values
+   * 
+   * @param array $params 
+   * @access public
+   * @return mixed
+   */
+  public function load($params) {
+    foreach($params as $key=>$val) {
+			$this->$key = $val; 
+		} 
+    return $this;
+  }
+
+  /**
    * load_tranlations 
    * 
    * @access private

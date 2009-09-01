@@ -145,6 +145,7 @@ class Router {
   private function parse_resource($res_route, $res_name, $parent = NULL) {
     $got_routes = array();
     $actions = array("index" => "get", "show" => "get", "new" => "get", "create" => "post", "edit" => "get", "update" => "post", "destroy" => "get");
+    $parent_actions = array('index' => 'get', 'new' => 'get', 'create' => 'post');
 
     if ($parent == NULL) {
       foreach ($actions as $action => $method) {
@@ -174,11 +175,36 @@ class Router {
         );
         $got_routes += $new_route;
       }
+    } else {
+      foreach ($parent_actions as $action => $method) {
+        $single_parent = Inflect::singularize($parent);
+        $route_val = "{{$single_parent}_id:int}/".$res_name;
+        if($action == 'new') {
+          $route_val .= "/".$action;
+        }
+
+        $res_action_name = $action == "index" ? $res_name : $action."_".Inflect::singularize($res_name);
+        $res_action_name = $single_parent."_".$res_action_name;
+
+        $new_route[$res_action_name] = array(
+          "route" => $route_val,
+          "controller" => $res_name,
+          "action" => $action."_for_".$single_parent,
+          "method" => $method
+        );
+        $got_routes += $new_route;
+      }
     }
 
     if(is_array($res_route['nested'])) {
       foreach ($res_route['nested'] as $nested_name => $nested_route) {
-        $got_routes = $got_routes + $this->parse_resource($nested_route, $nested_name, $res_name);
+        $got_nested_routes = $this->parse_resource($nested_route, $nested_name, $res_name);
+        foreach ($got_nested_routes as $key_route => $val_route) {
+          if(!$res_route['default']) {
+            $val_route['route'] = $res_name."/".$val_route['route'];
+          }
+          $got_routes[$key_route] = $val_route;
+        }
       }
     }
     return $got_routes;

@@ -1,0 +1,174 @@
+#!/usr/bin/php
+<?php
+
+require_once('lib/inflect.php');
+
+$args = $_SERVER['argv'];
+$target = $args[1];
+$p_count = $_SERVER['argc'] - 1;
+
+switch($target) {
+case "module":
+  if($p_count < 3) {
+    echo "Wrong parameters";
+    break;
+  }
+  generate_module($args[2], $args[3]);
+  break;
+case "controller":
+  if($p_count < 4) {
+    echo "Wrong parameters";
+    break;
+  }
+  $ations = array();
+  $scaffold = false;
+  if($args[5] == "scaffold") {
+    $scaffold = true;
+  } else {
+    if($p_count > 4) {
+      for ($i=5; $i <= $p_count; $i++) {
+        $actions[] = $args[$i];
+      }
+    }
+  }
+  generate_controller($args[4], $args[2], $args[3], $actions, $scaffold);
+  break;
+case "model":
+  if($p_count < 2) {
+    echo "Wrong parameters\n";
+
+    break;
+  }
+  if(!is_dir('models')) {
+    mkdir("models");
+    echo "created dir models/\n";
+  } else {
+    echo "existent models/\n";
+  }
+  $model_name = $args[2];
+  $f_path = "models/".$model_name.".php";
+  echo "created $f_path\n";
+  $model_class = ucwords($model_name);
+  $table_name = Inflect::pluralize($model_name);
+  $handle = fopen($f_path, "x");
+  $f_cont = <<< EOF
+<?php
+
+class $model_class extends PorkRecord {
+
+  public function __construct(\$ID=false) {
+    \$this->__setupDatabase(
+      '$table_name', array(
+        'id_$model_name' => 'ID',
+        'created_at' => 'created_at'),
+      'id_$model_name', \$ID);
+  }
+
+}
+
+?>
+EOF;
+
+  fwrite($handle, $f_cont);
+  fclose($handle);
+  break;
+case "facet":
+  if($p_count < 1) {
+    echo "Wrong parameters";
+    break;
+  }
+  break;
+default:
+  echo "Wrong target name!";
+  break;
+}
+
+function generate_controller($name, $facet, $module, $actions=array(), $scaffold = false) {
+  if($scaffold) {
+    $actions = array('index', 'show', 'new', 'create', 'edit', 'update', 'destroy');
+  }
+  $path = "xfacets/{$facet}/modules/{$module}";
+  prepare_path($path."/views/{$name}");
+
+  foreach ($actions as $action) {
+    $f_path = $path."/views/{$name}/{$action}.html.php";
+    $handle = fopen($f_path, "x");
+
+    $f_cont = <<< EOF
+<h1>I am $action action in $f_path</h1>
+EOF;
+    fwrite($handle, $f_cont);
+    fclose($handle);
+    echo "created {$f_path}\n";
+  }
+
+  $path .= "/controllers";
+  prepare_path($path);
+
+  $f_path = "{$path}/{$name}_controller.php";
+  $handle = fopen($f_path, "x");
+
+  $class_name = ucwords($name);
+
+  $f_cont = <<< EOF
+<?php
+
+class {$class_name}Controller extends AppController {
+
+
+EOF;
+
+  foreach ($actions as $action) {
+    $f_cont .= <<< EOF
+  public function {$action}_action() {
+
+  }
+
+
+EOF;
+  }
+
+
+  $f_cont .= <<<EOF
+}
+
+?>
+EOF;
+
+  fwrite($handle, $f_cont);
+  fclose($handle);
+  echo "created {$f_path}\n";
+}
+
+function generate_module($facet, $name) {
+  $path = "facets/{$facet}/modules/{$name}";
+  prepare_path($path);
+  prepare_path($path."/controllers");
+  prepare_path($path."/layouts");
+  prepare_path($path."/views");
+
+  $f_path = $path."/layouts/html.php";
+  $handle = fopen($f_path, "x");
+  $f_cont = <<<EOF
+<div style="background-color:#efefef; border: 1px solid #aaa;">
+  <h2>I am layout of module $name in $f_path</h2>
+  <?php \$inner_content ?>
+</div>
+EOF;
+
+  fwrite($handle, $f_cont);
+  fclose($handle);
+
+  echo "created {$f_path}\n";
+}
+
+function prepare_path($path) {
+  if(!is_dir($path)){
+    mkdir($path, 0755, true);
+    echo "created dir {$path}\n";
+  } else {
+    echo "existent {$path}/\n";
+  }
+}
+
+?>

@@ -87,7 +87,7 @@ function generate_controller($name, $facet, $module, $actions=array(), $scaffold
   if($scaffold) {
     $actions = array('index', 'show', 'new', 'create', 'edit', 'update', 'destroy');
   }
-  $path = "xfacets/{$facet}/modules/{$module}";
+  $path = "facets/{$facet}/modules/{$module}";
   prepare_path($path."/views/{$name}");
 
   foreach ($actions as $action) {

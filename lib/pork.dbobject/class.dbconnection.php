@@ -326,7 +326,9 @@ class MySQLAdapter implements dbConnectionAdapter
 	 */
 	public function connect($host, $username, $password)
 	{	
-		return mysql_connect($host, $username, $password);
+    $link = mysql_connect($host, $username, $password);
+    mysql_set_charset("utf8", $link);
+    return $link;
 	}
 
 	/**

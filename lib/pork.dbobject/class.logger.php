@@ -117,7 +117,7 @@ class Logger {
 		$log->Type = $err;
 		$log->File = $errfile;
 		$log->Line = $errline;
-		$log->Time = now();
+		$log->Time = time();
 		$log->Save();
 		
 	}

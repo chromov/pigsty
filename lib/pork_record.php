@@ -186,7 +186,7 @@ class PorkRecord extends dbObject {
    * PERMISSIONS
    */
 
-  public function can_be_created() {
+  public static function can_be_created() {
     return false;
   }
 

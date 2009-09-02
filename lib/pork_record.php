@@ -29,6 +29,7 @@ class PorkRecord extends dbObject {
         $filters = array(get_class($this) => $filters);	
       }
       $results = $this->find_by_class_name($class_name, $filters, $extra, $just_these);
+      $obj = new $class_name;
 
       $this->analyzeRelations();
       switch($this->relations[$class_name]->relationType) {
@@ -36,9 +37,9 @@ class PorkRecord extends dbObject {
         return(sizeof($results) > 0 ? $results[0] : NULL);
         break;
       case RELATION_FOREIGN:
-        if(array_key_exists($this->databaseInfo->primary, $results[0]->databaseInfo->fields)) {
+        if(array_key_exists($this->databaseInfo->primary, $obj->databaseInfo->fields)) {
           return(sizeof($results) > 0 ? $results : array());
-        } elseif(array_key_exists($results[0]->databaseInfo->primary, $this->databaseInfo->fields)) {
+        } elseif(array_key_exists($obj->databaseInfo->primary, $this->databaseInfo->fields)) {
           return(sizeof($results) > 0 ? $results[0] : NULL);
         }
         break;

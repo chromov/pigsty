@@ -1,11 +1,14 @@
 RewriteEngine On
 
+#php_value display_errors 1
+#php_value display_startup_errors 1
+
 # don't try to rewrite already rewritten queries
 RewriteRule ^dispatcher.php - [L]
 RewriteRule ^public/ - [L]
 
 # file from public folder goes through
-RewriteCond %{DOCUMENT_ROOT}public%{REQUEST_URI} -f
+RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
 RewriteRule ^.*$ public%{REQUEST_URI} [L]
 
 # we don't want to lose a query string

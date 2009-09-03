@@ -330,7 +330,7 @@ class Router {
         $regxp = "\d+";
         break;
       case "str":
-        $regxp = "\w+";
+        $regxp = "(\w|-)+";
         break;
     }
     return "(?<".$matches['name'].">".$regxp.")";

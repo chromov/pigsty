@@ -22,6 +22,15 @@ class Utils {
     return false;
   }
 
+
+  public static function slugify($str) {
+    $str = I18n::transliterate($str);
+    $str = strtolower(trim($str));
+    $str = preg_replace('/[^a-z0-9-]/', '-', $str);
+    $str = preg_replace('/-+/', "-", $str);
+    return $str;
+  }
+
 }
 
 ?>

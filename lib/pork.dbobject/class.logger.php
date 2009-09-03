@@ -138,7 +138,7 @@ class Logger {
 		$log->POST = !empty($_POST) ? json_encode($_POST) : "";
 		$log->GET = !empty($_GET) ? json_encode($_GET) : "";
 		$log->Type = $type;
-		$log->Time = now();
+		$log->Time = time();
 		
 		if(!$trace) $trace = debug_backtrace();
 		$curlog = (sizeof($trace) > 2) ? $trace[2] : (sizeof($trace)> 1) ?  $trace[1] : $trace[0];

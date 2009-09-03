@@ -152,7 +152,7 @@ function generate_module($facet, $name) {
   $f_cont = <<<EOF
 <div style="background-color:#efefef; border: 1px solid #aaa;">
   <h2>I am layout of module $name in $f_path</h2>
-  <?php \$inner_content ?>
+  <?= \$inner_content ?>
 </div>
 EOF;
 

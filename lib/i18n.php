@@ -144,7 +144,23 @@ class I18n {
     return $output;
   } 
 
-
+  /**
+   * plural 
+   * 
+   * @param integer $n 
+   * @param string $f1 
+   * @param string $f2 
+   * @param string $f3 
+   * @static
+   * @access public
+   * @return string
+   */
+  public static function plural($n, $f1, $f2, $f3) {
+    if(($n % 10 == 1) && ($n % 100 != 11)) return $f1;
+    if(in_array($n % 10, array(2,3,4)) && !in_array($n % 100, array(12,13,14))) return $f2;
+    if(($n % 10 == 0) || in_array($n % 10, array(5,6,7,8,9)) || in_array($n % 100, array(11,12,13,14))) return $f3;
+    return $f1;
+  }
 
   /**
    * tr 

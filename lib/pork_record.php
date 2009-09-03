@@ -153,6 +153,21 @@ class PorkRecord extends dbObject {
     return $this;
   }
 
+  public function save() {
+		if(sizeof($this->changedValues) > 0 && $this->databaseInfo->ID == false) { // it's a new record for the db
+      $this->touch_datetime_field('created_at');
+    } elseif ($this->changedValues != false) { // otherwise just build the update query
+      $this->touch_datetime_field('updated_at');
+    }
+    return parent::save();
+  }
+
+  public function touch_datetime_field($property) {
+    if($this->hasProperty($property) && !array_key_exists($this->fieldForProperty($property), $this->changedValues)) {
+			$this->changedValues[$this->fieldForProperty($property)] = date("Y-m-d H:i:s");
+    }
+  }
+
   /**
    * load_tranlations 
    * 

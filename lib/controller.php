@@ -163,10 +163,10 @@ class Controller {
    * @param array $fixed_params List of params to insert into route template
    * @param array $query_params Additional parameters
    * @access public
-   * @return void
+   * @return string
    */
   protected function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
-    "<a href=".Router::load()->path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
+    return "<a href=".Router::load()->path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
   }
 
 }

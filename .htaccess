@@ -2,6 +2,7 @@ RewriteEngine On
 
 #php_value display_errors 1
 #php_value display_startup_errors 1
+php_flag magic_quotes_gpc off
 
 # don't try to rewrite already rewritten queries
 RewriteRule ^dispatcher.php - [L]

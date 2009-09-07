@@ -156,6 +156,7 @@ class PorkRecord extends dbObject {
   public function save() {
 		if(sizeof($this->changedValues) > 0 && $this->databaseInfo->ID == false) { // it's a new record for the db
       $this->touch_datetime_field('created_at');
+      $this->touch_datetime_field('updated_at');
     } elseif ($this->changedValues != false) { // otherwise just build the update query
       $this->touch_datetime_field('updated_at');
     }

@@ -49,8 +49,12 @@ if(!function_exists('get_called_class')) {
     $controller = new $controller_name($__params);
     call_user_func(array($controller, $__params['action']."_action"));
   } catch(Exception $e) {
-    header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
-    include('public/404.html.php');
+    if(($_GET['URI__'] == "") && ($def_facet = Router::load()->get_default_facet())) {
+      header("Location: ".Router::load()->path_to($def_facet."_root"));
+    } else {
+      header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
+      include('public/404.html.php');
+    }
   }
 
 ?>

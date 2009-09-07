@@ -33,6 +33,14 @@ class Router {
   private $localized = true;
 
   /**
+   * default_facet 
+   * 
+   * @var string
+   * @access private
+   */
+  private $default_facet = "";
+
+  /**
    * result_parameters 
    * 
    * @var array
@@ -95,7 +103,6 @@ class Router {
     }
     if (array_key_exists('root', $facet_body)) {
       $route_body = $facet_body['root'];
-      $route_body['route'] = "";
       $route_body['facet'] = $facet_name;
       $root = array($facet_name."_root" => $route_body);
       $got_routes += $root;
@@ -103,6 +110,8 @@ class Router {
     foreach ($got_routes as $route_name => $route_body) {
       if(!$facet_body['default']) {
         $route_body['route'] = $route_body['route'] == "" ? $facet_name : $facet_name."/".$route_body['route'];
+      } else {
+        $this->default_facet = $facet_name;
       }
       $route_body['facet'] = $facet_name;
       $got_routes[$route_name] = $route_body;
@@ -248,6 +257,19 @@ class Router {
 
   public static function get_routes() {
     return self::$routes;
+  }
+
+  /**
+   * get_default_facet 
+   * 
+   * @access public
+   * @return mixed
+   */
+  public function get_default_facet() {
+    if($this->default_facet) {
+      return $this->default_facet;
+    }
+    return NULL;
   }
 
   /**

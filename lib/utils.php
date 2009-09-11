@@ -15,7 +15,12 @@ class Utils {
     if(class_exists($capital)) {
       return $capital;
     }
-    $sin = ucwords(Inflect::singularize($class_name));
+    $parts = explode("_", $class_name);
+    $first_caps = "";
+    foreach($parts as $part) {
+      $first_caps .= ucwords($part);
+    }
+    $sin = ucwords(Inflect::singularize($first_caps));
     if(class_exists($sin)) {
       return $sin;
     }

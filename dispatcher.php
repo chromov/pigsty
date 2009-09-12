@@ -47,7 +47,9 @@ if(!function_exists('get_called_class')) {
     require_once("./facets/".$__params['facet']."/modules/".$__params['module']."/controllers/".$__params['controller']."_controller.php");
     $controller_name = ucwords($__params['controller'])."Controller";
     $controller = new $controller_name($__params);
-    call_user_func(array($controller, $__params['action']."_action"));
+    if(!$controller->headers_sent) {
+      call_user_func(array($controller, $__params['action']."_action"));
+    }
   } catch(Exception $e) {
     if(($_GET['URI__'] == "") && ($def_facet = Router::load()->get_default_facet())) {
       header("Location: ".Router::load()->path_to($def_facet."_root"));

@@ -23,14 +23,13 @@ class Controller {
    */
   protected $render_options = array();
 
-
   /**
    * headers_sent 
    * 
    * @var boolean
-   * @access private
+   * @access public
    */
-  protected $headers_sent = false;
+  public $headers_sent = false;
 
   /**
    * __construct 

@@ -72,6 +72,21 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * find_count 
+   * 
+   * @param array $filters 
+   * @param array $extra 
+   * @param array $justThese 
+   * @access public
+   * @return integer
+   */
+  static public function find_count($filters=array(), $extra=array(), $justThese= array()) {
+    $class_name = get_called_class();
+    $obj = new $class_name();
+    return($obj->find_count_by_class_name($class_name, $filters, $extra, $just_these));
+  }
+
+  /**
    * find_first 
    * 
    * @param array $filters 
@@ -110,6 +125,21 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * find_count_by_class_name 
+   * 
+   * @param string $className 
+   * @param array $filters 
+   * @param array $extra 
+   * @param array $justThese 
+   * @access public
+   * @return integer
+   */
+  public function find_count_by_class_name($className, $filters=array(), $extra=array(), $justThese=array()) {
+		$builder = new QueryBuilder($className, $filters, $extra, $justThese);
+		return ( $builder->getCount());
+  }
+
+  /**
    * translates 
    * 
    * @param array $fields 
@@ -138,6 +168,29 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * paginate 
+   * 
+   * @param int $page 
+   * @param int $per_page 
+   * @param array $filters 
+   * @param array $extra 
+   * @param array $just_these 
+   * @access public
+   * @return Paginate
+   */
+  public function paginate($page = NULL, $per_page = 20, $filters=array(), $extra=array(), $just_these=array()) {
+    $class_name = get_called_class();
+    $obj = new $class_name();
+
+    if($page == NULL) {
+      $page = 1;
+    }
+    $collection = $obj->find_by_class_name($class_name, $filters, array_merge($extra, array("limit {($page-1)*$per_page}, {$per_page}")), $just_these);
+    $count = $obj->find_count_by_class_name();
+    return(new Paginate($collection, $page, ceil($count/$per_page)));
+  }
+
+  /**
    * load 
    *
    * TODO it should store only changed values
@@ -153,6 +206,12 @@ class PorkRecord extends dbObject {
     return $this;
   }
 
+  /**
+   * save 
+   * 
+   * @access public
+   * @return mixed
+   */
   public function save() {
 		if(sizeof($this->changedValues) > 0 && $this->databaseInfo->ID == false) { // it's a new record for the db
       $this->touch_datetime_field('created_at');
@@ -163,6 +222,13 @@ class PorkRecord extends dbObject {
     return parent::save();
   }
 
+  /**
+   * touch_datetime_field 
+   * 
+   * @param string $property 
+   * @access public
+   * @return void
+   */
   public function touch_datetime_field($property) {
     if($this->hasProperty($property) && !array_key_exists($this->fieldForProperty($property), $this->changedValues)) {
 			$this->changedValues[$this->fieldForProperty($property)] = date("Y-m-d H:i:s");

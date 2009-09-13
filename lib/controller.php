@@ -67,16 +67,20 @@ class Controller {
     $output = $this->prepare_template($base.$this->params['action'].".html.php");
 
     $module_layout = "html.php";
-    if ($this->render_options['module_layout']) {
-      $module_layout = $this->render_options['module_layout'].".".$module_layout;
+    if ($this->render_options['module_layout'] != '') {
+      $module_layout = $this->render_options['module_layout'];
     }
-    $output = $this->prepare_template($base."../../layouts/".$module_layout, $output);
+    if ($module_layout) {
+      $output = $this->prepare_template($base."../../layouts/".$module_layout, $output);
+    }
 
     $facet_layout = "html.php";
-    if ($this->render_options['facet_layout']) {
-      $facet_layout = $this->render_options['facet_layout'].".".$facet_layout;
+    if($this->render_options['facet_layout'] != '') {
+      $facet_layout = $this->render_options['facet_layout'];
     }
-    $output = $this->prepare_template($base."../../../../layouts/".$facet_layout, $output);
+    if($facet_layout) {
+      $output = $this->prepare_template($base."../../../../layouts/".$facet_layout, $output);
+    }
 
     //sending it out
     echo $output;

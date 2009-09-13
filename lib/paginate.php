@@ -24,7 +24,7 @@ class Paginate {
    * @var integer
    * @access private
    */
-  private $total;
+  public $total;
   
   /**
    * __construct 
@@ -51,15 +51,12 @@ class Paginate {
     $links_parts = array();
     
     //TODO split pages in three parts
-    $links_parts[0] = range(1, 10);
+    $links_parts[0] = range(1, $this->total);
 
-    $link_base = strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page="
+    $link_base = strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page=";
 
     $res = '<div class="pager" style="margin: 15px 0; text-align:center">';
     if($this->current_page > 1) {
-      if($this->current_page > 2) {
-        $res .= '<span class="full_backward"><a href="'.$link_base."1".'" title="На першу сторінку" style="font-size:16px;">&laquo;</a></span>';
-      }
       $res .= '<span class="backward"><a href="'.$link_base.($this->current_page-1).'" title="Назад" style="font-size:16px;">&lsaquo;</a></span>';
     }
     $res .= '<ul style="list-style: none; display: inline; margin: 0">';
@@ -80,9 +77,6 @@ class Paginate {
     $res .= '</ul>';
     if($this->current_page < $this->total) {
       $res .= '<span class="forward"><a href="'.$link_base.($this->current_page+1).'" title="Вперед" style="font-size:16px;">&rsaquo;</a></span>';
-      if($this->current_page < $this->total -1 ) {
-        $res .= '<span class="full_forward"><a href="'.$link_base.$this->total.'" title="На останню сторінку" style="font-size:16px;">&raquo;</a></span>';
-      }
     }
     $res .= '</div>';
     return $res;
@@ -91,3 +85,4 @@ class Paginate {
 }
 
 ?>
+

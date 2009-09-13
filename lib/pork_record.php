@@ -175,20 +175,24 @@ class PorkRecord extends dbObject {
    * @param array $filters 
    * @param array $extra 
    * @param array $just_these 
+   * @static
    * @access public
-   * @return Paginate
+   * @return string
    */
-  public function paginate($page = NULL, $per_page = 20, $filters=array(), $extra=array(), $just_these=array()) {
+  static public function paginate($page = NULL, $per_page = 20, $filters=array(), $extra=array(), $just_these=array()) {
     $class_name = get_called_class();
     $obj = new $class_name();
 
     if($page == NULL) {
       $page = 1;
     }
-    $collection = $obj->find_by_class_name($class_name, $filters, array_merge($extra, array("limit {($page-1)*$per_page}, {$per_page}")), $just_these);
-    $count = $obj->find_count_by_class_name();
-    return(new Paginate($collection, $page, ceil($count/$per_page)));
+    $offset = ($page-1)*$per_page;
+    $collection = $obj->find_by_class_name($class_name, $filters, array_merge($extra, array("limit {$offset}, {$per_page}")), $just_these);
+    $count = $obj->find_count_by_class_name($class_name);
+    return (new Paginate($collection, $page, ceil($count/$per_page)));
   }
+
+
 
   /**
    * load 

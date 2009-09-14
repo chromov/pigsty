@@ -45,7 +45,7 @@ if(!function_exists('get_called_class')) {
     require_once("./controllers/root_controller.php");
     require_once("./controllers/facets/".$__params['facet']."_controller.php");
     require_once("./facets/".$__params['facet']."/modules/".$__params['module']."/controllers/".$__params['controller']."_controller.php");
-    $controller_name = ucwords($__params['controller'])."Controller";
+    $controller_name = Utils::first_caps($__params['controller'])."Controller";
     $controller = new $controller_name($__params);
     if(!$controller->headers_sent) {
       call_user_func(array($controller, $__params['action']."_action"));

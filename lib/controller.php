@@ -67,7 +67,7 @@ class Controller {
     $output = $this->prepare_template($base.$this->params['action'].".html.php");
 
     $module_layout = "html.php";
-    if ($this->render_options['module_layout'] != '') {
+    if ($this->render_options['module_layout'] !== '') {
       $module_layout = $this->render_options['module_layout'];
     }
     if ($module_layout) {
@@ -75,7 +75,7 @@ class Controller {
     }
 
     $facet_layout = "html.php";
-    if($this->render_options['facet_layout'] != '') {
+    if($this->render_options['facet_layout'] !== '') {
       $facet_layout = $this->render_options['facet_layout'];
     }
     if($facet_layout) {

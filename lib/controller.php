@@ -183,6 +183,32 @@ class Controller {
     $this->headers_sent = true;
   }
 
+  /**
+   * safe_params 
+   * Strips html tags from the fields of passed array. And leaves untouched
+   * fields listed in $safe_keys parameter
+   * 
+   * @param array $params 
+   * @param array $safe_keys 
+   * @access public
+   * @return array
+   */
+  public function safe_params($params, $safe_keys=array()) {
+    $safe = array();
+    if(is_array($params)) {
+      foreach($params as $key => $val) {
+        if(!in_array($key, $safe_keys)) {
+          $safe[$key] = strip_tags($val);
+        } else {
+          $safe[$key] = $val;
+        }
+      }
+    } else {
+      return false;
+    }
+    return $safe;
+  }
+
   /* Helper methods */
 
   /**

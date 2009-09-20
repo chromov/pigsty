@@ -16,6 +16,14 @@ class PorkRecord extends dbObject {
   private $translated_fields = array();
 
   /**
+   * debug_mode 
+   * 
+   * @var boolean
+   * @access public
+   */
+  public $debug_mode = false;
+
+  /**
    * overloaded __call method handles model relations
    */
   public function __call($name, $args) {
@@ -120,6 +128,9 @@ class PorkRecord extends dbObject {
   public function find_by_class_name($className, $filters=array(), $extra=array(), $justThese=array()) {
 		$builder = new QueryBuilder($className, $filters, $extra, $justThese);
 		$input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
+    if($this->debug_mode) {
+      var_dump($builder->buildQuery());
+    }
     $results = dbObject::importArray($className, $input);
 		return($results != false ? $results : array());
   }
@@ -136,6 +147,9 @@ class PorkRecord extends dbObject {
    */
   public function find_count_by_class_name($className, $filters=array(), $extra=array(), $justThese=array()) {
 		$builder = new QueryBuilder($className, $filters, $extra, $justThese);
+    if($this->debug_mode) {
+      var_dump($builder->buildQuery());
+    }
 		return ( $builder->getCount());
   }
 

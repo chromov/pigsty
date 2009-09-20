@@ -44,6 +44,10 @@ class Controller {
     $this->render_options['module_layout'] = '';
     $this->render_options['facet_layout'] = '';
 
+    $base = $_SERVER['DOCUMENT_ROOT']."/";
+    $base = str_replace('//', '/', $base);
+    $this->doc_root = $base;
+
     $this->before_filter();
   }
 
@@ -59,8 +63,7 @@ class Controller {
     if ($this->headers_sent) {
       return;
     }
-    $base = $_SERVER['DOCUMENT_ROOT']."/";
-    $base = str_replace('//', '/', $base);
+    $base = $this->doc_root;
     $base .= "facets/".$this->params['facet']."/modules/".$this->params['module']."/views/".$this->params['controller']."/";
 
     // prepearing an output
@@ -122,6 +125,26 @@ class Controller {
   }
 
   /**
+   * render_partial 
+   * 
+   * @param string $partial 
+   * @param array $vars 
+   * @param array $params 
+   * @access protected
+   * @return string
+   */
+  protected function render_partial($partial, $vars=array(), $params=array()) {
+    $p_params = $this->params;
+    if($params) {
+      foreach($params as $key => $val) {
+        $p_params[$key] = $val;
+      }
+    }
+    $partial_path = $this->doc_root."facets/{$p_params['facet']}/modules/{$p_params['module']}/views/{$p_params['controller']}/_{$partial}.html.php";
+    return $this->prepare_template($partial_path, "", $vars);
+  }
+
+  /**
    * prepare_template 
    * 
    * @param string $file_path 
@@ -129,9 +152,14 @@ class Controller {
    * @access private
    * @return string
    */
-  private function prepare_template($file_path, $inner_content = "") {
+  private function prepare_template($file_path, $inner_content = "", $vars=array()) {
     if (!file_exists($file_path)) {
       return "<strong>Can't find template <em>$file_path</em></strong><br/>\n".$inner_content;
+    }
+    if($vars) {
+      foreach($vars as $key => $val) {
+        $$key = $val;
+      }
     }
     ob_start();
     require($file_path);

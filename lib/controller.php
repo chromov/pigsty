@@ -1,5 +1,7 @@
 <?php
 
+require_once('lib/bbcode/bbcode.php');
+
 /**
  * Controller class
  * This class is responsible for all site controllers
@@ -224,6 +226,18 @@ class Controller {
    */
   protected function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
     return "<a href=".Router::load()->path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
+  }
+
+  /**
+   * bb2html 
+   * 
+   * @param string $text 
+   * @access protected
+   * @return string
+   */
+  protected function bb2html($text) {
+    $bb = new bbcode($text);
+    return $bb->get_html();
   }
 
 }

@@ -254,6 +254,36 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * touch_slug 
+   * 
+   * @param string $property 
+   * @param string $slug 
+   * @access public
+   * @return void
+   */
+  public function touch_slug($property='name', $slug='slug') {
+    if($this->hasProperty($property) && $this->hasProperty($slug)) {
+      $r_slug = Utils::slugify($this->$property);
+      $iter = 1;
+
+      $filter = array();
+      if($this->databaseInfo->ID !== false) {
+        $filter = array("{$this->databaseInfo->primary} != {$this->databaseInfo->ID}");
+      }
+      while (sizeof($this->find_by_class_name(get_class($this), array_merge($filter,array($slug => $r_slug)))) > 0) {
+        $r_slug = Utils::slugify($this->$property)."-".$iter; 
+        $iter++;
+        if($iter > 5) {
+          $r_slug = md5(time());
+        }
+      }
+
+      $this->changedValues[$this->fieldForProperty($slug)] = $r_slug;
+    }
+    return $this;
+  }
+
+  /**
    * load_tranlations 
    * 
    * @access private

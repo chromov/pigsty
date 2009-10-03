@@ -25,6 +25,14 @@ class Paginate {
    * @access private
    */
   public $total;
+
+  /**
+   * window 
+   * 
+   * @var integer
+   * @access public
+   */
+  public $window = 15;
   
   /**
    * __construct 
@@ -49,9 +57,33 @@ class Paginate {
    */
   public function render() {
     $links_parts = array();
+    $wing = floor($this->window/2);
     
-    //TODO split pages in three parts
-    $links_parts[0] = range(1, $this->total);
+    if($this->window + 4 < $this->total){
+      if((3+$wing < $this->current_page) && ($this->total - $wing - 2 > $this->current_page)) {
+        $links_parts[0] = array(1);
+        $links_parts[1] = range($this->current_page - $wing, $this->current_page + $wing);
+        $links_parts[2] = array($this->total);
+      } else {
+        if(3+$wing < $this->current_page) {
+          $links_parts[0] = array(1);
+          if($this->total - $this->current_page < $wing) {
+            $links_parts[1] = range($this->total - $this->window +1, $this->total);
+          } else {
+            $links_parts[1] = range($this->current_page - $wing, $this->total);
+          }
+        } else {
+          if($this->current_page <= $wing) {
+            $links_parts[0] = range(1, $this->window);
+          } else {
+            $links_parts[0] = range(1, $this->current_page + $wing);
+          }
+          $links_parts[1] = array($this->total);
+        }
+      }
+    } else {
+      $links_parts[0] = range(1, $this->total);
+    }
 
     $link_base = strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page=";
 
@@ -70,7 +102,7 @@ class Paginate {
         }
       }
       if($index + 1 != sizeof($links_parts)) {
-        $res .= '<span>&0133;</span>';
+        $res .= '<span>...</span>';
       }
     }
 

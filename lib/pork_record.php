@@ -64,6 +64,16 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * __destruct 
+   * 
+   * @access public
+   * @return void
+   */
+  public function __destruct() {
+    
+  }
+
+  /**
    * find 
    * 
    * @param array $filters 

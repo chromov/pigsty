@@ -34,6 +34,15 @@ class I18n {
   private static $locale = "";
 
   /**
+   * default_locale 
+   * 
+   * @static
+   * @var string
+   * @access public
+   */
+  public static $default_locale = "ua";
+
+  /**
    * active 
    * 
    * @static
@@ -73,6 +82,9 @@ class I18n {
    * @return string
    */
   public static function get_locale() {
+    if(self::$locale == '') {
+      return self::$default_locale;
+    }
     return self::$locale;
   }  
 
@@ -197,7 +209,7 @@ class I18n {
     if(isset(self::$fallbacks[$locale])) {
       return self::$fallbacks[$locale];
     } else {
-      return '';
+      return self::$default_locale;
     }
   }
 

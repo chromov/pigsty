@@ -142,6 +142,9 @@ class PorkRecord extends dbObject {
       var_dump($builder->buildQuery());
     }
     $results = dbObject::importArray($className, $input);
+    foreach($results as $_res) {
+      $_res->load_tranlations();
+    }
 		return($results != false ? $results : array());
   }
 
@@ -185,9 +188,7 @@ class PorkRecord extends dbObject {
 			$fieldnames = implode(",", array_keys($this->databaseInfo->fields));
 			$input = dbConnection::getInstance($this->databaseInfo->connection)->fetchRow("select {$fieldnames} from {$this->databaseInfo->table} where {$this->databaseInfo->primary} = {$this->databaseInfo->ID}", 'assoc');
 			$this->import($input);
-      if (sizeof($this->translated_fields > 0)) {
-        $this->load_tranlations();
-      }
+      $this->load_tranlations();
 		} 
   }
 
@@ -300,8 +301,11 @@ class PorkRecord extends dbObject {
    * @return void
    */
   private function load_tranlations() {
+    if(sizeof($this->translated_fields) == 0) {
+      return;
+    }
     $fieldnames = implode(",", array_keys($this->translated_fields));
-    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where parent_id = {$this->databaseInfo->ID}", 'assoc');
+    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}", 'assoc');
 
     if($values != false && sizeof($values) > 0) {
       foreach ($values as $row) {

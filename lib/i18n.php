@@ -183,13 +183,10 @@ class I18n {
    * @return string
    */
   public static function tr($subject) {
-    if (self::$locale == "") {
-      return "Locale is not set";
-    }
-    if (!isset(self::$translations[self::$locale])) {
+    if (!isset(self::$translations[self::get_locale()])) {
       return "";
     }
-    $trans = self::$translations[self::$locale];
+    $trans = self::$translations[self::get_locale()];
     if (isset($trans[$subject])) {
       return $trans[$subject];
     } else {

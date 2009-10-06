@@ -30,7 +30,7 @@ class Router {
    * @var boolean
    * @access public
    */
-  public $with_unlocalized = false;
+  public static $with_unlocalized = false;
 
   /**
    * default_facet 
@@ -56,6 +56,19 @@ class Router {
    * @access private
    */
   private static $instance = NULL;
+
+
+  /**
+   * set_with_unlocalized 
+   * 
+   * @param boolean $val 
+   * @static
+   * @access public
+   * @return void
+   */
+  public static function set_with_unlocalized($val) {
+    self::$with_unlocalized = $val;
+  }
 
   /**
    * load 
@@ -115,10 +128,12 @@ class Router {
         $this->default_facet = $facet_name;
       }
       $route_body['facet'] = $facet_name;
+      $route_body['route_name'] = $route_name;
 
       if(I18n::get_active()) {
-        if($this->with_unlocalized) {
+        if(self::$with_unlocalized) {
           $ul_routes[$route_name."_unlocalized"] = $route_body;
+          $ul_routes[$route_name."_unlocalized"]['route_name'] = $route_name."_unlocalized";
         }
         $route_body['route'] = "{locale:str}/".$route_body['route'];
       }

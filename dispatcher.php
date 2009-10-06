@@ -34,7 +34,7 @@ if(!function_exists('get_called_class')) {
     if ($__params === false) {
       throw new Exception("No route");
     }
-    if(I18n::get_active()) {
+    if(I18n::get_active() && isset($__params['locale'])) {
       I18n::set_locale($__params['locale']);
     }
 

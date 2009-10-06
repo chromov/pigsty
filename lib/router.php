@@ -25,12 +25,12 @@ class Router {
   private $result_routes = array();
 
   /**
-   * localized 
+   * with_unlocalized 
    * 
    * @var boolean
-   * @access private
+   * @access public
    */
-  private $localized = true;
+  public $with_unlocalized = false;
 
   /**
    * default_facet 
@@ -107,19 +107,25 @@ class Router {
       $root = array($facet_name."_root" => $route_body);
       $got_routes += $root;
     }
+    $ul_routes = array();
     foreach ($got_routes as $route_name => $route_body) {
       if(!$facet_body['default']) {
         $route_body['route'] = $route_body['route'] == "" ? $facet_name : $facet_name."/".$route_body['route'];
       } else {
         $this->default_facet = $facet_name;
       }
+      $route_body['facet'] = $facet_name;
+
       if(I18n::get_active()) {
+        if($this->with_unlocalized) {
+          $ul_routes[$route_name."_unlocalized"] = $route_body;
+        }
         $route_body['route'] = "{locale:str}/".$route_body['route'];
       }
-      $route_body['facet'] = $facet_name;
+
       $got_routes[$route_name] = $route_body;
     }
-    return $got_routes;
+    return(array_merge($got_routes, $ul_routes));
   }
 
   /**
@@ -273,17 +279,6 @@ class Router {
       return $this->default_facet;
     }
     return NULL;
-  }
-
-  /**
-   * set_localized 
-   * 
-   * @param boolean $val 
-   * @access public
-   * @return void
-   */
-  public function set_localized($val) {
-    $this->localized = $val;
   }
 
   /**

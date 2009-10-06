@@ -113,6 +113,9 @@ class Router {
       } else {
         $this->default_facet = $facet_name;
       }
+      if(I18n::get_active()) {
+        $route_body['route'] = "{locale:str}/".$route_body['route'];
+      }
       $route_body['facet'] = $facet_name;
       $got_routes[$route_name] = $route_body;
     }
@@ -380,6 +383,13 @@ class Router {
    */
   public function path_to($route_name, $fixed_params=array(), $query_params=array()) {
     if(isset($this->result_routes[$route_name])) {
+      if(!isset($fixed_params['locale'])) {
+        if(isset($this->result_parameters['locale'])) {
+          $fixed_params['locale'] = $this->result_parameters['locale'];
+        } else {
+          $fixed_params['locale'] = I18n::$default_locale;
+        }
+      }
       $route = $this->result_routes[$route_name]['route'];
       foreach ($fixed_params as $key => $value) {
         $route = preg_replace("/\{$key:\w+\}/", $value, $route);

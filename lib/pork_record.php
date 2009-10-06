@@ -141,9 +141,10 @@ class PorkRecord extends dbObject {
     if($this->debug_mode) {
       var_dump($builder->buildQuery());
     }
-    $results = dbObject::importArray($className, $input);
-    foreach($results as $_res) {
-      $_res->load_tranlations();
+    if($results = dbObject::importArray($className, $input)) {
+      foreach($results as $_res) {
+        $_res->load_tranlations();
+      }
     }
 		return($results != false ? $results : array());
   }
@@ -177,6 +178,12 @@ class PorkRecord extends dbObject {
     $this->translated_fields = $fields;
   }
 
+
+  public function __setupDatabase($table, $fields, $primarykey, $id=false, $connection='Database') {
+    parent::__setupDatabase($table, $fields, $primarykey, $id, $connection);
+    if($id) $this->__init();
+  }
+
   /**
    * __init 
    * 
@@ -185,9 +192,6 @@ class PorkRecord extends dbObject {
    */
   private function __init() {
     if($this->databaseInfo->ID != false) {
-			$fieldnames = implode(",", array_keys($this->databaseInfo->fields));
-			$input = dbConnection::getInstance($this->databaseInfo->connection)->fetchRow("select {$fieldnames} from {$this->databaseInfo->table} where {$this->databaseInfo->primary} = {$this->databaseInfo->ID}", 'assoc');
-			$this->import($input);
       $this->load_tranlations();
 		} 
   }
@@ -318,7 +322,7 @@ class PorkRecord extends dbObject {
       $translated_fields = array();
       if ($locale != "") {
         $desired_row = $translations[$locale];
-        foreach ($fieldnames as $field) {
+        foreach ($this->translated_fields as $field) {
           $translated_fields[$field] = $desired_row[$field];
         }
       }

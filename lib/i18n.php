@@ -209,7 +209,7 @@ class I18n {
     if(isset(self::$fallbacks[$locale])) {
       return self::$fallbacks[$locale];
     } else {
-      return self::$default_locale;
+      return '';
     }
   }
 

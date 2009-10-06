@@ -34,6 +34,9 @@ if(!function_exists('get_called_class')) {
     if ($__params === false) {
       throw new Exception("No route");
     }
+    if(I18n::get_active()) {
+      I18n::set_locale($__params['locale']);
+    }
 
     foreach ($_POST as $key => $val) {
       if (!array_key_exists($key, $__params)) $__params[$key] = $val;

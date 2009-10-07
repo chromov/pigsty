@@ -402,7 +402,9 @@ class Router {
       }
       $route = $this->result_routes[$route_name]['route'];
       foreach ($fixed_params as $key => $value) {
-        $route = preg_replace("/\{$key:\w+\}/", $value, $route);
+        if(is_string($value) || is_int($value)) {
+          $route = preg_replace("/\{$key:\w+\}/", $value, $route);
+        }
       }
       if (count($query_params) > 0) {
         $pairs = array();

@@ -252,7 +252,23 @@ class PorkRecord extends dbObject {
     } elseif ($this->changedValues != false) { // otherwise just build the update query
       $this->touch_datetime_field('updated_at');
     }
-    return parent::save();
+    if (($this->changedValues != false) && (sizeof($this->changedValues) > 0)) {
+      $changed_translations = array();
+      if(($this->translated_fields) && ($changed_translations = array_intersect_key($this->changedValues, array_flip($this->translated_fields)))) {
+        $this->changedValues = array_diff_key($this-> changedValues, $changed_translations);
+      }
+      if($ret_id = parent::save()) {
+        if(sizeof($changed_translations) > 0) {
+          if($this->has_translation(I18n::get_locale())) {
+            $this->update_translation($changed_translations, I18n::get_locale());
+          } else {
+            $this->add_translation($changed_translations, I18n::get_locale());
+          }
+        }
+      }
+      return $ret_id;
+    }
+    return false;
   }
 
   /**
@@ -278,6 +294,9 @@ class PorkRecord extends dbObject {
    */
   public function touch_slug($property='name', $slug='slug') {
     if($this->hasProperty($property) && $this->hasProperty($slug)) {
+      if((array_search($property, $this->translated_fields) !== false) && I18n::get_active() && (I18n::get_locale() != I18n::$default_locale)) {
+        return $this;
+      }
       $r_slug = Utils::slugify($this->$property);
       $iter = 1;
 
@@ -296,6 +315,37 @@ class PorkRecord extends dbObject {
       $this->changedValues[$this->fieldForProperty($slug)] = $r_slug;
     }
     return $this;
+  }
+
+  public function has_translation($locale) {
+    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID} and locale = '{$locale}'", 'assoc');
+    return(($values != false && sizeof($values) > 0) ? true : false);
+  }
+
+  public function update_translation($new_fields, $locale) {
+    $updateQuery = "";
+    $new_fields['updated_at'] = date("Y-m-d H:i:s");
+    foreach ($new_fields as $property=>$value) {
+      $updateQuery .= ($updateQuery != '') ? ', ' : '';
+      $updateQuery .= ($value != '') ? " {$property} = '".dbConnection::getInstance($this->databaseInfo->connection)->escapeValue($value)."'" : "{$property} = NULL";
+      $this->databaseValues[$property] = $this->changedValues[$property];
+    }
+    dbConnection::getInstance($this->databaseInfo->connection)->query("update {$this->databaseInfo->table}_translations set {$updateQuery} where id_parent = {$this->databaseInfo->ID} and locale = '{$locale}'");   
+  }
+
+  public function add_translation($new_fields, $locale) {
+    $insertValues = "";
+    $new_fields['locale'] = $locale;
+    $new_fields['id_parent'] = $this->databaseInfo->ID;
+    $new_fields['created_at'] = date("Y-m-d H:i:s");
+    $new_fields['updated_at'] = $new_fields['created_at'];
+    $insertfields = implode(",", array_keys($new_fields));
+    foreach ($new_fields as $property=>$value) {
+      $insertValues .= ($insertValues != '') ? ', ' : '';
+      $insertValues .= "'".dbConnection::getInstance($this->databaseInfo->connection)->escapeValue($value)."'";
+      $this->databaseValues[$property] = $this->changedValues[$property];
+    }
+    dbConnection::getInstance($this->databaseInfo->connection)->query("insert into {$this->databaseInfo->table}_translations ({$insertfields}) values ($insertValues);");
   }
 
   /**

@@ -24,6 +24,32 @@ class PorkRecord extends dbObject {
   public $debug_mode = false;
 
   /**
+   * hasProperty
+   * 
+   * @param string $property 
+   * @access public
+   * @return boolean
+   */
+  public function hasProperty($property) { 
+    if(array_search($property, $this->translated_fields) !== false) return true;
+    return parent::hasProperty($property);
+  }
+
+  /**
+   * fieldForProperty 
+   * 
+   * @param string $property 
+   * @access public
+   * @return mixed
+   */
+	public function fieldForProperty($property) {
+    if(array_search($property, $this->translated_fields) !== false) {
+      return $property;
+    }
+    return parent::fieldForProperty($property);
+  }
+
+  /**
    * overloaded __call method handles model relations
    */
   public function __call($name, $args) {

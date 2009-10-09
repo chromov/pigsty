@@ -69,7 +69,11 @@ class Controller {
     $base .= "facets/".$this->params['facet']."/modules/".$this->params['module']."/views/".$this->params['controller']."/";
 
     // prepearing an output
-    $output = $this->prepare_template($base.$this->params['action'].".html.php");
+    if(is_file($base.$this->params['action'].".".I18n::get_locale().".html.php")) {
+      $output = $this->prepare_template($base.$this->params['action'].".".I18n::get_locale().".html.php");
+    } else {
+      $output = $this->prepare_template($base.$this->params['action'].".html.php");
+    }
 
     $module_layout = "html.php";
     if ($this->render_options['module_layout'] !== '') {

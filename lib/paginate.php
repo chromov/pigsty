@@ -85,7 +85,7 @@ class Paginate {
       $links_parts[0] = range(1, $this->total);
     }
 
-    $link_base = strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page=";
+    $link_base = "/".(strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page=");
 
     $res = '<div class="pager" style="margin: 15px 0; text-align:center">';
     if($this->current_page > 1) {

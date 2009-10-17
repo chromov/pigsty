@@ -686,7 +686,6 @@ class QueryBuilder
 	 */
 	private function buildFilters($what, $value, $class)
 	{
-		
 		$wtclass = (array_key_exists($what, $class->relations))  ? new $what() :false;
 
 		if($wtclass instanceof dbObject && is_array($value)) {  // filter by a property of a subclass
@@ -701,12 +700,19 @@ class QueryBuilder
 			$this->wheres[] = $this->mapFields($value, $class);
 		}
 		else { // standard $field=>$value whereclause. Prefix with tablename for speed.
+      $matches = array();
+      if(is_string($what) && preg_match("/^(\w+) like$/", $what, $matches)) {
+        if(!($class instanceof dbObject)) $class = new $class();
+        $value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
+        $what = $class->fieldForProperty($matches[1]);
+        $this->wheres[] = "{$class->databaseInfo->table}.{$what} like '{$value}'";
+      } else {
+        if((!$class instanceof dbObject)) $class = new $class();
+        $value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
 
-			if((!$class instanceof dbObject)) $class = new $class();
-			$value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
-
-			$what = $class->fieldForProperty($what);
-			$this->wheres[] = "{$class->databaseInfo->table}.{$what} = '{$value}'";
+        $what = $class->fieldForProperty($what);
+        $this->wheres[] = "{$class->databaseInfo->table}.{$what} = '{$value}'";
+      }
 		}
 	}
 

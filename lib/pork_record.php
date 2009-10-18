@@ -112,6 +112,11 @@ class PorkRecord extends dbObject {
   static public function find($filters=array(), $extra=array(), $just_these=array()) {
     $class_name = get_called_class();
     $obj = new $class_name();
+    if(is_numeric($filters)) {
+      $filters = array($obj->databaseInfo->primary => $filters );
+      $results = $obj->find_by_class_name($class_name, $filters, $extra, $just_these);
+      return $results[0];
+    }
     return($obj->find_by_class_name($class_name, $filters, $extra, $just_these));
   }
 

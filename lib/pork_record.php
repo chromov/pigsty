@@ -248,7 +248,7 @@ class PorkRecord extends dbObject {
     }
     $offset = ($page-1)*$per_page;
     $collection = $obj->find_by_class_name($class_name, $filters, array_merge($extra, array("limit {$offset}, {$per_page}")), $just_these);
-    $count = $obj->find_count_by_class_name($class_name);
+    $count = $obj->find_count_by_class_name($class_name, $filters);
     return (new Paginate($collection, $page, ceil($count/$per_page)));
   }
 

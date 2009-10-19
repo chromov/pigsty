@@ -85,7 +85,17 @@ class Paginate {
       $links_parts[0] = range(1, $this->total);
     }
 
-    $link_base = "/".(strpos($_GET['URI__'], "?") === false ? $_GET['URI__']."?page=" : $_GET['URI__']."&page=");
+    $q_params = array();
+    foreach($_GET as $g_param => $g_val) {
+      if(($g_param != "page") && ($g_param != 'URI__')) {
+        $q_params[] = "{$g_param}={$g_val}";
+      }
+    }
+    if(sizeof($q_params) > 0) {
+      $link_base = "/".$_GET['URI__']."?".join($q_params, "&")."&page=";
+    } else {
+      $link_base = "/".$_GET['URI__']."?page=";
+    }
 
     $res = '<div class="pager" style="margin: 15px 0; text-align:center">';
     if($this->current_page > 1) {

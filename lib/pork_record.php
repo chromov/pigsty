@@ -385,7 +385,7 @@ class PorkRecord extends dbObject {
    * @access private
    * @return void
    */
-  private function load_tranlations() {
+  protected function load_tranlations() {
     if(sizeof($this->translated_fields) == 0) {
       return;
     }

@@ -598,6 +598,8 @@ class QueryBuilder
 {
 	var $class, $fields, $filters, $extras, $justthese, $joins, $groups, $wheres, $limit, $orders;
 
+  public static $dont_escape = false;
+
 	/**
 	 * QueryBuilder::__construct()
 	 * 
@@ -696,7 +698,9 @@ class QueryBuilder
 		}
 		elseif(is_numeric($what)) { // it's a custom whereclause (not just $field=>$value)		
 			if((!$class instanceof dbObject)) $class = new $class();
-			$value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
+      if(!self::$dont_escape) {
+        $value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
+      }
 			$this->wheres[] = $this->mapFields($value, $class);
 		}
 		else { // standard $field=>$value whereclause. Prefix with tablename for speed.

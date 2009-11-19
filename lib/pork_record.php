@@ -167,8 +167,8 @@ class PorkRecord extends dbObject {
    * @return mixed
    */
   public function find_by_class_name($className, $filters=array(), $extra=array(), $justThese=array()) {
-		$builder = new QueryBuilder($className, $filters, $extra, $justThese);
-		$input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
+    $builder = new QueryBuilder($className, $filters, $extra, $justThese);
+    $input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
     if($this->debug_mode) {
       var_dump($builder->buildQuery());
     }
@@ -252,7 +252,25 @@ class PorkRecord extends dbObject {
     return (new Paginate($collection, $page, ceil($count/$per_page)));
   }
 
-
+  /**
+   * paginate_collection 
+   * 
+   * @param int $page 
+   * @param int $per_page 
+   * @param array $collection 
+   * @static
+   * @access public
+   * @return Paginate
+   */
+  static public function paginate_collection($page = NULL, $per_page = 20, $collection = array()) {
+    if($page == NULL) {
+      $page = 1;
+    }
+    $offset = ($page-1)*$per_page;
+    $count = sizeof($collection);
+    $collection = array_slice($collection, $offset, $per_page);
+    return (new Paginate($collection, $page, ceil($count/$per_page)));
+  }
 
   /**
    * load 

@@ -90,6 +90,26 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * __set 
+   * 
+   * @param mixed $property 
+   * @param mixed $value 
+   * @access public
+   * @return void
+   */
+  public function __set($property, $value) {
+    if(is_array($value)) {
+      if(isset($value['year']) || isset($value['min'])) {
+        $time = mktime($value['hour'], $value['min'], 0, $value['month'], $value['day'], $value['year']);
+        $value = date('Y-m-d H:i:s', $time);
+      } else {
+        $value = implode(', ', $value);
+      }
+    }
+    parent::__set($property, $value);
+  }
+
+  /**
    * __destruct 
    * 
    * @access public

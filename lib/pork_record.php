@@ -122,11 +122,13 @@ class PorkRecord extends dbObject {
 
 
   public function __get($property) { 
-    $pg = parent::__get($property);
-    if($property != 'ID' && !$pg && $this->parent_object) {
+    if($this->hasProperty($property)) {
+      $pg = parent::__get($property);
+      return $pg;
+    } elseif($property != 'ID' && $this->parent_object) {
       return $this->parent_object->__get($property);
     }
-    return $pg;
+    return false;
   }
 
   /**
@@ -214,7 +216,7 @@ class PorkRecord extends dbObject {
     }
     if($results = dbObject::importArray($className, $input)) {
       foreach($results as $key => $_res) {
-        if($_res->type && class_exists($_res->type)) {
+        if($_res->hasProperty('type') && class_exists($_res->type)) {
           $child = $_res->find_sti_child();
           $child->parent_object = $_res;
           $results[$key] = $child;

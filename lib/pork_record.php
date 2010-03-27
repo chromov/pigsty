@@ -16,6 +16,14 @@ class PorkRecord extends dbObject {
   private $translated_fields = array();
 
   /**
+   * parent_object 
+   * 
+   * @var mixed
+   * @access private
+   */
+  private $parent_object;
+
+  /**
    * debug_mode 
    * 
    * @var boolean
@@ -106,7 +114,19 @@ class PorkRecord extends dbObject {
         $value = implode(', ', $value);
       }
     }
+    if($this->parent_object) {
+      $this->parent_object->__set($property, $value);
+    }
     parent::__set($property, $value);
+  }
+
+
+  public function __get($property) { 
+    $pg = parent::__get($property);
+    if($property != 'ID' && !$pg && $this->parent_object) {
+      return $this->parent_object->__get($property);
+    }
+    return $pg;
   }
 
   /**
@@ -193,11 +213,46 @@ class PorkRecord extends dbObject {
       var_dump($builder->buildQuery());
     }
     if($results = dbObject::importArray($className, $input)) {
-      foreach($results as $_res) {
-        $_res->load_tranlations();
+      foreach($results as $key => $_res) {
+        if($_res->type && class_exists($_res->type)) {
+          $child = $_res->find_sti_child();
+          $child->parent_object = $_res;
+          $results[$key] = $child;
+        } else {
+          $_res->load_tranlations();
+          if($_res->parent_object) {
+            $_res->parent_object = $_res->find_sti_parent();
+          }
+        }
       }
     }
 		return($results != false ? $results : array());
+  }
+
+  /**
+   * find_sti_child 
+   * 
+   * @access private
+   * @return mixed
+   */
+  private function find_sti_child() {
+    $builder = new QueryBuilder($this->type, array('parent_id' => $this->ID));
+    $input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
+    $results = dbObject::importArray($this->type, $input);
+    return ((is_array($results) && (sizeof($results) > 0)) ? $results[0] : false);
+  }
+
+  /**
+   * find_sti_parent 
+   * 
+   * @access private
+   * @return mixed
+   */
+  private function find_sti_parent() {
+    $builder = new QueryBuilder(get_class($this->parent_object), array('type' => get_class($this), $this->parent_object->databaseInfo->primary => $this->parent_id));
+    $input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
+    $results = dbObject::importArray(get_class($this->parent_object), $input);
+    return ((is_array($results) && (sizeof($results) > 0)) ? $results[0] : false);
   }
 
   /**
@@ -232,6 +287,10 @@ class PorkRecord extends dbObject {
 
   public function __setupDatabase($table, $fields, $primarykey, $id=false, $connection='Database') {
     parent::__setupDatabase($table, $fields, $primarykey, $id, $connection);
+    $this_class = get_called_class();
+    if((($parent_class = get_parent_class($this_class)) != "PorkRecord") && ($this_class != "PorkRecord")) {
+      $this->parent_object = new $parent_class;
+    }
     if($id) $this->__init();
   }
 
@@ -315,27 +374,46 @@ class PorkRecord extends dbObject {
    * @return mixed
    */
   public function save() {
-		if(sizeof($this->changedValues) > 0 && $this->databaseInfo->ID == false) { // it's a new record for the db
+		if($this->databaseInfo->ID == false) { // it's a new record for the db
       $this->touch_datetime_field('created_at');
       $this->touch_datetime_field('updated_at');
     } elseif ($this->changedValues != false) { // otherwise just build the update query
       $this->touch_datetime_field('updated_at');
     }
     if (($this->changedValues != false) && (sizeof($this->changedValues) > 0)) {
-      $changed_translations = array();
-      if(($this->translated_fields) && ($changed_translations = array_intersect_key($this->changedValues, array_flip($this->translated_fields)))) {
-        $this->changedValues = array_diff_key($this-> changedValues, $changed_translations);
-      }
-      if($ret_id = parent::save()) {
-        if(sizeof($changed_translations) > 0) {
-          if($this->has_translation(I18n::get_locale())) {
-            $this->update_translation($changed_translations, I18n::get_locale());
-          } else {
-            $this->add_translation($changed_translations, I18n::get_locale());
-          }
+      $all_valid = true;
+      if($this->parent_object) {
+        $this->parent_object->type = get_called_class();
+        if (!$this->parent_object->save()) {
+          $all_valid = false;
         }
       }
-      return $ret_id;
+
+      if($all_valid) {
+        $changed_translations = array();
+        if(($this->translated_fields) && ($changed_translations = array_intersect_key($this->changedValues, array_flip($this->translated_fields)))) {
+          $this->changedValues = array_diff_key($this-> changedValues, $changed_translations);
+        }
+        if($this->parent_object) {
+          $this->parent_id = $this->parent_object->databaseInfo->ID;
+        }
+        if($ret_id = parent::save()) {
+          if(sizeof($changed_translations) > 0) {
+            if($this->has_translation(I18n::get_locale())) {
+              $this->update_translation($changed_translations, I18n::get_locale());
+            } else {
+              $this->add_translation($changed_translations, I18n::get_locale());
+            }
+          }
+        }
+        return $ret_id;
+      } else {
+        return false;
+      }
+    } elseif($this->databaseInfo->ID != false) {
+      if($this->parent_object && $this->parent_object->save()) {
+        return true;
+      }
     }
     return false;
   }

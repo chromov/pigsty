@@ -289,7 +289,7 @@ class PorkRecord extends dbObject {
 
   public function __setupDatabase($table, $fields, $primarykey, $id=false, $connection='Database') {
     parent::__setupDatabase($table, $fields, $primarykey, $id, $connection);
-    $this_class = get_called_class();
+    $this_class = get_class($this);
     if((($parent_class = get_parent_class($this_class)) != "PorkRecord") && ($this_class != "PorkRecord")) {
       $this->parent_object = new $parent_class;
     }
@@ -367,6 +367,36 @@ class PorkRecord extends dbObject {
 			$this->$key = $val; 
 		} 
     return $this;
+  }
+
+  /**
+   * is_new_record 
+   * 
+   * @access public
+   * @return boolean
+   */
+  public function is_new_record() {
+    return $this->databaseInfo->ID == false;
+  }
+
+  /**
+   * resource 
+   * 
+   * @access public
+   * @return string
+   */
+  public function resource() {
+    return Inflect::singularize($this->databaseInfo->table);
+  }
+
+  /**
+   * resources 
+   * 
+   * @access public
+   * @return string
+   */
+  public function resources() {
+    return $this->databaseInfo->table;
   }
 
   /**
@@ -466,8 +496,12 @@ class PorkRecord extends dbObject {
     return $this;
   }
 
-  public function has_translation($locale) {
-    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID} and locale = '{$locale}'", 'assoc');
+  public function has_translation($locale = "") {
+    $and_locale = "";
+    if($locale != "") { 
+      $and_locale = " and locale = '{$locale}'";
+    }
+    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}".$and_locale, 'assoc');
     return(($values != false && sizeof($values) > 0) ? true : false);
   }
 
@@ -527,6 +561,17 @@ class PorkRecord extends dbObject {
       }
       $this->databaseValues = array_merge($this->databaseValues, $translated_fields);
     }
+  }
+
+  protected function destroy_translations() {
+    dbConnection::getInstance($this->databaseInfo->connection)->query("delete from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}");
+  }
+
+  public function destroy() {
+    if($this->has_translation()) {
+      $this->destroy_translations();
+    }
+    $this->deleteYourSelf();
   }
 
   /**

@@ -233,50 +233,6 @@ class Controller {
   }
 
   /**
-   * date_input 
-   * 
-   * @param string $object_name 
-   * @param string $field_name 
-   * @param string $date 
-   * @param boolean $has_empty 
-   * @param string $start_year 
-   * @param string $end_year 
-   * @access protected
-   * @return string
-   */
-  protected function date_input($object_name, $field_name, $date = NULL, $has_empty = false, $start_year = "1950", $end_year = "2050") {
-    if ($date == NULL) {
-      $date = date("d-m-Y");
-    } else {
-      $has_empty = false;
-    }
-    $date_arr = getdate(strtotime($date));
-    $output = '<select class="date_input" id="'.$object_name.'_'.$field_name.'" name="'.$object_name.'['.$field_name.'][day]">';
-    if ($has_empty) $output .= '<option value="0">--</option>';
-    for($d = 1; $d <= 31; $d++) {
-      $output .= '<option ';
-      if(!$has_empty && ($date_arr['mday'] == $d)) $output .= 'selected="selected" ';
-      $output .= 'value="'.$d.'">'.sprintf("%02d",$d).'</option>';
-    }
-    $output .= '</select><select name="'.$object_name.'['.$field_name.'][month]">';
-    if ($has_empty) $output .= '<option value="0">--</option>';
-    for($m = 1; $m <= 12; $m++) {
-      $output .= '<option ';
-      if(!$has_empty && ($date_arr['mon'] == $m)) $output .= 'selected="selected" ';
-      $output .= 'value="'.$m.'">'.sprintf("%02d",$m).'</option>';
-    }
-    $output .= '</select><select name="'.$object_name.'['.$field_name.'][year]">';
-    if ($has_empty) $output .= '<option value="0">----</option>';
-    for($y = (int)$start_year; $y <= (int)$end_year; $y++) {
-      $output .= '<option ';
-      if(!$has_empty && ($date_arr['year'] == $y)) $output .= 'selected="selected" ';
-      $output .= 'value="'.$y.'">'.$y.'</option>';
-    }
-    $output .= '</select>';
-    return $output;
-  }
-
-  /**
    * bb2html 
    * 
    * @param string $text 

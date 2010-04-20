@@ -149,7 +149,7 @@ class Form {
    * @return string
    */
   static public function date_select_tag($object, $field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
-    return self::date_input_tag($object->resource(), $field, $object->$field, $has_empty = false, $start_year = "1950", $end_year = "2050");
+    return self::date_input_tag($object->resource(), $field, $object->$field, $has_empty = false, $start_year, $end_year);
   }
 
   /**
@@ -248,7 +248,7 @@ class Form {
    * @return string
    */
   public function date_select($field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
-    return self::date_select_tag($this->object, $field, $has_empty = false, $start_year = "1950", $end_year = "2050");
+    return self::date_select_tag($this->object, $field, $has_empty = false, $start_year, $end_year);
   }
 
   /**

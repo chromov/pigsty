@@ -46,6 +46,11 @@ class Controller {
     $this->render_options['module_layout'] = '';
     $this->render_options['facet_layout'] = '';
 
+    $this->render_options['facet'] = $this->params['facet'];
+    $this->render_options['module'] = $this->params['module'];
+    $this->render_options['controller'] = $this->params['controller'];
+    $this->render_options['action'] = $this->params['action'];
+
     $base = $_SERVER['DOCUMENT_ROOT']."/";
     $base = str_replace('//', '/', $base);
     $this->doc_root = $base;
@@ -66,13 +71,13 @@ class Controller {
       return;
     }
     $base = $this->doc_root;
-    $base .= "facets/".$this->params['facet']."/modules/".$this->params['module']."/views/".$this->params['controller']."/";
+    $base .= "facets/".$this->render_options['facet']."/modules/".$this->render_options['module']."/views/".$this->render_options['controller']."/";
 
     // prepearing an output
-    if(is_file($base.$this->params['action'].".".I18n::get_locale().".html.php")) {
-      $output = $this->prepare_template($base.$this->params['action'].".".I18n::get_locale().".html.php");
+    if(is_file($base.$this->render_options['action'].".".I18n::get_locale().".html.php")) {
+      $output = $this->prepare_template($base.$this->render_options['action'].".".I18n::get_locale().".html.php");
     } else {
-      $output = $this->prepare_template($base.$this->params['action'].".html.php");
+      $output = $this->prepare_template($base.$this->render_options['action'].".html.php");
     }
 
     $module_layout = "html.php";

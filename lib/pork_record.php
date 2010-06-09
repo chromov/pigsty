@@ -31,6 +31,10 @@ class PorkRecord extends dbObject {
    */
   public $debug_mode = false;
 
+  public function set_parent_object($parent) {
+    $this->parent_object = $parent;
+  }
+
   /**
    * hasProperty
    * 

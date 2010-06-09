@@ -219,12 +219,13 @@ class PorkRecord extends dbObject {
         if($_res->hasProperty('type') && class_exists($_res->type)) {
           $child = $_res->find_sti_child();
           $child->parent_object = $_res;
+          $child->load_tranlations();
           $results[$key] = $child;
         } else {
-          $_res->load_tranlations();
           if($_res->parent_object) {
             $_res->parent_object = $_res->find_sti_parent();
           }
+          $_res->load_tranlations();
         }
       }
     }
@@ -538,6 +539,9 @@ class PorkRecord extends dbObject {
    * @return void
    */
   protected function load_tranlations() {
+    if($this->parent_object) {
+      $this->parent_object->load_tranlations();
+    }
     if(sizeof($this->translated_fields) == 0) {
       return;
     }

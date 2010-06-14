@@ -31,8 +31,25 @@ class PorkRecord extends dbObject {
    */
   public $debug_mode = false;
 
+  /**
+   * set_parent_object 
+   * 
+   * @param mixed $parent 
+   * @access public
+   * @return void
+   */
   public function set_parent_object($parent) {
     $this->parent_object = $parent;
+  }
+
+  /**
+   * get_parent_object 
+   * 
+   * @access public
+   * @return PorkRecord
+   */
+  public function get_parent_object() {
+    return $this->parent_object;
   }
 
   /**

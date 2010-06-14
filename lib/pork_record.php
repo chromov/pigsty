@@ -113,6 +113,8 @@ class PorkRecord extends dbObject {
         return false;
         break;
       }
+    } elseif($parent = $this->get_parent_object()) {
+      return $parent->__call($name, $args);
     } else {
       return false;
     }

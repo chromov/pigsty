@@ -137,10 +137,13 @@ class PorkRecord extends dbObject {
         $value = implode(', ', $value);
       }
     }
-    if($this->parent_object) {
+    if($this->hasProperty($property)) {
+      parent::__set($property, $value);
+    } elseif(($this->parent_object) && ($this->parent_object->hasProperty($property))) {
       $this->parent_object->__set($property, $value);
+    } else {
+			Logger::Trace("Tried to set a non-dbObject property for ".get_class($this), $property, $value);
     }
-    parent::__set($property, $value);
   }
 
 

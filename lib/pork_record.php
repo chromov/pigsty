@@ -442,7 +442,7 @@ class PorkRecord extends dbObject {
     if (($this->changedValues != false) && (sizeof($this->changedValues) > 0)) {
       $all_valid = true;
       if($this->parent_object) {
-        $this->parent_object->type = get_called_class();
+        $this->parent_object->type = get_class($this);
         if (!$this->parent_object->save()) {
           $all_valid = false;
         }

@@ -597,10 +597,17 @@ class PorkRecord extends dbObject {
     dbConnection::getInstance($this->databaseInfo->connection)->query("delete from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}");
   }
 
+  protected function destroy_sti_parent() {
+    if($this->parent_object) {
+      $this->parent_object->destroy();
+    }
+  }
+
   public function destroy() {
     if($this->has_translation()) {
       $this->destroy_translations();
     }
+    $this->destroy_sti_parent();
     $this->deleteYourSelf();
   }
 

@@ -714,8 +714,25 @@ class QueryBuilder
         if((!$class instanceof dbObject)) $class = new $class();
         $value = dbConnection::getInstance($this->class->databaseInfo->connection)->escapeValue($value);
 
-        $what = $class->fieldForProperty($what);
-        $this->wheres[] = "{$class->databaseInfo->table}.{$what} = '{$value}'";
+        $db_field = '';
+        if($class->translates_field($what)) {
+          $db_field = "{$class->databaseInfo->table}_translations.{$what}";
+          $this->joins[] = "left join \n\t {$class->databaseInfo->table}_translations on {$class->databaseInfo->table}_translations.id_parent = {$class->databaseInfo->table}.{$class->databaseInfo->primary}";
+        } elseif(($parent_object = $class->get_parent_object()) && $parent_object->hasProperty($what)) {
+          if($parent_object->translates_field($what)) {
+            $db_field = "{$parent_object->databaseInfo->table}_translations.{$what}";
+            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table} on {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} = {$class->databaseInfo->table}.parent_id";
+            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table}_translations on {$parent_object->databaseInfo->table}_translations.id_parent = {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary}";
+          } else {
+            $what = $parent_object->fieldForProperty($what);
+            $db_field = "{$parent_object->databaseInfo->table}.{$what}";
+            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table} on {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} = {$class->databaseInfo->table}.parent_id";
+          }
+        } else {
+          $what = $class->fieldForProperty($what);
+          $db_field = "{$class->databaseInfo->table}.{$what}";
+        }
+        $this->wheres[] = "{$db_field} = '{$value}'";
       }
 		}
 	}

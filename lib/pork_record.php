@@ -313,6 +313,17 @@ class PorkRecord extends dbObject {
     $this->translated_fields = $fields;
   }
 
+  /**
+   * translates_field 
+   * 
+   * @param string $field 
+   * @access public
+   * @return boolean
+   */
+  public function translates_field($field) {
+    return(array_search($field, $this->translated_fields) !== false);
+  }
+
 
   public function __setupDatabase($table, $fields, $primarykey, $id=false, $connection='Database') {
     parent::__setupDatabase($table, $fields, $primarykey, $id, $connection);

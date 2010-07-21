@@ -737,7 +737,7 @@ class QueryBuilder
 	}
 
   private function join_with_translation() {
-    $this->joins["{$this->class->databaseInfo->table}_translations"] = "left join \n\t {$this->class->databaseInfo->table}_translations on {$this->class->databaseInfo->table}_translations.id_parent = {$this->class->databaseInfo->table}.{$this->class->databaseInfo->primary}";
+    $this->joins["{$this->class->databaseInfo->table}_translations"] = "left join \n\t {$this->class->databaseInfo->table}_translations on {$this->class->databaseInfo->table}_translations.id_parent = {$this->class->databaseInfo->table}.{$this->class->databaseInfo->primary} \n\t and {$this->class->databaseInfo->table}_translations.locale = '".I18n::get_locale()."'";
   }
 
   private function join_with_parent($parent_object) {
@@ -746,7 +746,7 @@ class QueryBuilder
 
   private function join_with_parent_translation($parent_object) {
     $this->join_with_parent($parent_object);
-    $this->joins["{$parent_object->databaseInfo->table}_translations"] = "left join \n\t {$parent_object->databaseInfo->table}_translations on {$parent_object->databaseInfo->table}_translations.id_parent = {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary}";
+    $this->joins["{$parent_object->databaseInfo->table}_translations"] = "left join \n\t {$parent_object->databaseInfo->table}_translations on {$parent_object->databaseInfo->table}_translations.id_parent = {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} \n\t and {$parent_object->databaseInfo->table}_translations.locale = '".I18n::get_locale()."'";
   }
 
 	/**

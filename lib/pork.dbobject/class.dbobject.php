@@ -717,16 +717,15 @@ class QueryBuilder
         $db_field = '';
         if($class->translates_field($what)) {
           $db_field = "{$class->databaseInfo->table}_translations.{$what}";
-          $this->joins[] = "left join \n\t {$class->databaseInfo->table}_translations on {$class->databaseInfo->table}_translations.id_parent = {$class->databaseInfo->table}.{$class->databaseInfo->primary}";
+          $this->join_with_translation();
         } elseif(($parent_object = $class->get_parent_object()) && $parent_object->hasProperty($what)) {
           if($parent_object->translates_field($what)) {
             $db_field = "{$parent_object->databaseInfo->table}_translations.{$what}";
-            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table} on {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} = {$class->databaseInfo->table}.parent_id";
-            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table}_translations on {$parent_object->databaseInfo->table}_translations.id_parent = {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary}";
+            $this->join_with_parent_translation($parent_object);
           } else {
             $what = $parent_object->fieldForProperty($what);
             $db_field = "{$parent_object->databaseInfo->table}.{$what}";
-            $this->joins[] = "left join \n\t {$parent_object->databaseInfo->table} on {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} = {$class->databaseInfo->table}.parent_id";
+            $this->join_with_parent($parent_object);
           }
         } else {
           $what = $class->fieldForProperty($what);
@@ -736,6 +735,19 @@ class QueryBuilder
       }
 		}
 	}
+
+  private function join_with_translation() {
+    $this->joins["{$this->class->databaseInfo->table}_translations"] = "left join \n\t {$this->class->databaseInfo->table}_translations on {$this->class->databaseInfo->table}_translations.id_parent = {$this->class->databaseInfo->table}.{$this->class->databaseInfo->primary}";
+  }
+
+  private function join_with_parent($parent_object) {
+    $this->joins[$parent_object->databaseInfo->table] = "left join \n\t {$parent_object->databaseInfo->table} on {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary} = {$this->class->databaseInfo->table}.parent_id";
+  }
+
+  private function join_with_parent_translation($parent_object) {
+    $this->join_with_parent($parent_object);
+    $this->joins["{$parent_object->databaseInfo->table}_translations"] = "left join \n\t {$parent_object->databaseInfo->table}_translations on {$parent_object->databaseInfo->table}_translations.id_parent = {$parent_object->databaseInfo->table}.{$parent_object->databaseInfo->primary}";
+  }
 
 	/**
 	 * QueryBuilder::buildOrderBy()
@@ -778,6 +790,7 @@ class QueryBuilder
 		$words = preg_split("/([\s|\W]+)/", $query, -1, PREG_SPLIT_DELIM_CAPTURE);	
 		if(!empty($words)) {
 			foreach($words as $key=>$val) { 
+        $val = strtolower($val);
 				if(strlen(trim($val)) < 2) continue;
 				if(array_search(trim(strtoupper($val)), $reserved) !== false) continue;
 				if(is_numeric($val)) continue;
@@ -786,9 +799,20 @@ class QueryBuilder
 					if(sizeof($expl) == 2 && $expl[0] == $object->databaseInfo->table)  $val = $expl[1];
 					else continue;
 				}
-				if($object->hasProperty($val)) { 
-					$words[$key] = $object->databaseInfo->table.'.'.$object->fieldForProperty($val);
-				}
+        if($object->translates_field($val)) {
+          $this->join_with_translation();
+          $words[$key] = $object->databaseInfo->table.'_translations.'.$val;
+        } elseif(($parent_object = $object->get_parent_object()) && $parent_object->hasProperty($val)) {
+          if($parent_object->translates_field($val)) {
+            $this->join_with_parent_translation($parent_object);
+            $words[$key] = $parent_object->databaseInfo->table.'_translations.'.$val;
+          } else {
+            $this->join_with_parent($parent_object);
+            $words[$key] = $parent_object->databaseInfo->table.'.'.$parent_object->fieldForProperty($val);
+          }
+        } elseif($object->hasProperty($val)) {
+          $words[$key] = $object->databaseInfo->table.'.'.$object->fieldForProperty($val);
+        }
 			} 
 		}
 		return(implode("", $words));

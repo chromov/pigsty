@@ -61,6 +61,7 @@ class PorkRecord extends dbObject {
    */
   public function hasProperty($property) { 
     if(array_search($property, $this->translated_fields) !== false) return true;
+    if(array_key_exists($property, $this->databaseValues) !== false) return true;
     return parent::hasProperty($property);
   }
 

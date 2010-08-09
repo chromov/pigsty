@@ -287,6 +287,21 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * pid 
+   *
+   * returns id of itself or of the parent object if any
+   * 
+   * @access public
+   * @return integer
+   */
+  public function pid() {
+    if($this->parent_object) {
+      return $this->parent_object->pid();
+    }
+    return $this->ID;
+  }
+
+  /**
    * find_count_by_class_name 
    * 
    * @param string $className 

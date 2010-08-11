@@ -230,11 +230,20 @@ class Controller {
    * @param string $route_name The name of the route to use
    * @param array $fixed_params List of params to insert into route template
    * @param array $query_params Additional parameters
+   * @param array $options HTML options
    * @access public
    * @return string
    */
-  protected function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array()) {
-    return "<a href=".Router::load()->path_to($route_name, $fixed_params, $query_params).">".$link_text."</a>";
+  protected function link_to($link_text, $route_name, $fixed_params=array(), $query_params=array(), $options=array()) {
+    $attrs = '';
+    foreach ($options as $option => $value) {
+      if(in_array($option, array('class', 'style', 'title', 'id', 'media', 'rel', 'target', 'type', 'ping', 'hidden'))) {
+        $attrs .= " {$option} = \"{$value}\"";
+      } else {
+        $attrs .= " data-{$option} = \"{$value}\"";
+      }
+    }
+    return "<a href=\"".Router::load()->path_to($route_name, $fixed_params, $query_params)."\"{$attrs}>".$link_text."</a>";
   }
 
   /**

@@ -19,6 +19,22 @@ class Form {
   private $method = "";
 
   /**
+   * attrs 
+   * 
+   * @var string
+   * @access private
+   */
+  private $attrs = "";
+
+  /**
+   * pre_checkboxes 
+   * 
+   * @var array
+   * @access private
+   */
+  private $pre_checkboxes = array();
+
+  /**
    * object 
    * 
    * @var mixed
@@ -36,7 +52,7 @@ class Form {
    * @access public
    * @return Form
    */
-  public function __construct($object, $route_name = "", $fixed_params = array(), $method = "post") {
+  public function __construct($object, $route_name = "", $fixed_params = array(), $method = "post", $options = array()) {
     $this->method = $method;
     $this->object = $object;
     if($route_name == "") { // guess route from the given $object
@@ -48,8 +64,17 @@ class Form {
     } else {
       $this->action = Router::load()->path_to($route_name, $fixed_params);
     }
-    echo "<form action='{$this->action}' method='{$this->method}'>";
+    foreach ($options as $key => $option) {
+      $this->attrs .= " {$key} = '{$option}'";
+    }
+    ob_start();
   }
+
+
+  /**************************************
+   **  CLASS METHODS
+   **************************************/
+
 
   /**
    * tag 
@@ -62,6 +87,25 @@ class Form {
    */
   static public function tag($action = "", $method = "post") {
     return "<form action='{$action}' method='{$method}'>";
+  }
+
+  /**
+   * hidden_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @param string $value 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function hidden_tag($object, $field, $value = NULL) {
+    if($value != NULL) {
+      $input_val = $value;
+    } else {
+      $input_val = $object->$field;
+    }
+    return "<input type='hidden' name='{$object->resource()}[{$field}]' value='{$input_val}' />";
   }
 
   /**
@@ -81,14 +125,27 @@ class Form {
   /**
    * text_field_tag 
    * 
-   * @param mixed $object 
-   * @param mixed $field 
+   * @param PorkRecord $object 
+   * @param string $field 
    * @static
    * @access public
    * @return string
    */
   static public function text_field_tag($object, $field) {
     return "<input type='text' class='text' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='{$object->$field}' />";
+  }
+
+  /**
+   * file_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function file_tag($object, $field) {
+    return "<input type='file' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' class='file_upload' />";
   }
 
   /**
@@ -190,6 +247,38 @@ class Form {
   }
 
   /**
+   * checkbox_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @static
+   * @access private
+   * @return string
+   */
+  static private function checkbox_tag($object, $field) {
+    if($object->$field) $checked = " checked='yes'";
+    return "<input type='checkbox' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='1'{$checked} />";
+  }
+
+  /**
+   * submit 
+   * 
+   * @param string $value 
+   * @param string $name 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function submit_tag($value = "send", $name = "submit") {
+    return "<input type='submit' value='{$value}' name='{$name}' />";
+  }
+
+  /**************************************
+   **  INSTANCE METHODS
+   **************************************/
+
+
+  /**
    * select 
    * 
    * @param string $field 
@@ -223,6 +312,18 @@ class Form {
       $output .= "<option value='{$object->$value_property}'".($this->object->$field == $object->$value_property ? " selected='selected'" : "").">{$object->$text_property}</option>\n";
     }
     return self::select_tag($this->object, $field, $output);
+  }
+
+  /**
+   * hidden 
+   * 
+   * @param string $field 
+   * @param string $value 
+   * @access public
+   * @return string
+   */
+  public function hidden($field, $value) {
+    return self::hidden_tag($this->object, $field, $value);
   }
 
   /**
@@ -263,27 +364,56 @@ class Form {
   }
 
   /**
+   * file 
+   * 
+   * @param string $field 
+   * @access public
+   * @return string
+   */
+  public function file($field) {
+    $this->attrs .= " enctype='multipart/form-data'";
+    return self::file_tag($this->object, $field);
+  }
+
+  /**
+   * checkbox 
+   * 
+   * @param string $field 
+   * @access public
+   * @return string
+   */
+  public function checkbox($field) {
+    $this->pre_checkboxes[] = $field;
+    return self::checkbox_tag($this->object, $field);
+  }
+
+  /**
    * submit 
    * 
    * @param string $value 
    * @param string $name 
-   * @static
    * @access public
    * @return string
    */
-  static public function submit($value = "send", $name = "submit") {
-    return "<input type='submit' value='{$value}' name='{$name}' />";
+  public function submit($value = "send", $name = "submit") {
+    return self::submit_tag($value, $name);
   }
 
   /**
-   * close 
+   * end 
    * 
-   * @static
    * @access public
-   * @return string
+   * @return void
    */
-  static public function close() {
-    return "</form>";
+  public function end() {
+    $result = ob_get_contents();
+    ob_end_clean();
+    echo "<form action='{$this->action}' method='{$this->method}'{$this->attrs}>\n";
+    foreach($this->pre_checkboxes as $pc) {
+      echo $this->hidden($pc, '0');
+    }
+    echo $result;
+    echo "\n</form>\n";
   }
 
 }

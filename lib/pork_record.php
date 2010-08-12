@@ -24,6 +24,30 @@ class PorkRecord extends dbObject {
   private $parent_object;
 
   /**
+   * file_observers 
+   * 
+   * @var array
+   * @access private
+   */
+  protected $file_observers = array();
+
+  /**
+   * before_save_observers
+   * 
+   * @var array
+   * @access protected
+   */
+  protected $before_save_observers = array();
+
+  /**
+   * after_save_observers 
+   * 
+   * @var array
+   * @access protected
+   */
+  protected $after_save_observers = array();
+
+  /**
    * debug_mode 
    * 
    * @var boolean
@@ -137,6 +161,14 @@ class PorkRecord extends dbObject {
       } else {
         $value = implode(', ', $value);
       }
+    }
+    if(get_class($value) == "File") { 
+      if(array_key_exists($property, $this->file_observers)) {
+        call_user_func(array($this, $this->file_observers[$property]), $value);
+      } elseif(($parent = $this->get_parent_object()) && (array_key_exists($property, $parent->file_observers))) {
+        $parent->__set($property, $value);
+      }
+      return;
     }
     if($this->hasProperty($property)) {
       parent::__set($property, $value);
@@ -461,6 +493,11 @@ class PorkRecord extends dbObject {
    * @return mixed
    */
   public function save() {
+    foreach ($this->before_save_observers as $bs) {
+      call_user_func(array($this, $bs));
+    }
+    call_user_func(array($this, $this->file_observers[$property]), $value);
+    $ret = false;
 		if($this->databaseInfo->ID == false) { // it's a new record for the db
       $this->touch_datetime_field('created_at');
       $this->touch_datetime_field('updated_at');
@@ -493,14 +530,20 @@ class PorkRecord extends dbObject {
             }
           }
         }
-        return $ret_id;
+        $ret = $ret_id;
       } else {
         return false;
       }
     } elseif($this->databaseInfo->ID != false) {
       if($this->parent_object && $this->parent_object->save()) {
-        return true;
+        $ret = true;
       }
+    }
+    if($ret) {
+      foreach ($this->after_save_observers as $as) {
+        call_user_func(array($this, $as));
+      }
+      return $ret;
     }
     return false;
   }
@@ -551,6 +594,13 @@ class PorkRecord extends dbObject {
     return $this;
   }
 
+  /**
+   * has_translation 
+   * 
+   * @param string $locale 
+   * @access public
+   * @return void
+   */
   public function has_translation($locale = "") {
     $and_locale = "";
     if($locale != "") { 
@@ -560,6 +610,14 @@ class PorkRecord extends dbObject {
     return(($values != false && sizeof($values) > 0) ? true : false);
   }
 
+  /**
+   * update_translation 
+   * 
+   * @param array $new_fields 
+   * @param string $locale 
+   * @access public
+   * @return void
+   */
   public function update_translation($new_fields, $locale) {
     $updateQuery = "";
     $new_fields['updated_at'] = date("Y-m-d H:i:s");
@@ -571,6 +629,14 @@ class PorkRecord extends dbObject {
     dbConnection::getInstance($this->databaseInfo->connection)->query("update {$this->databaseInfo->table}_translations set {$updateQuery} where id_parent = {$this->databaseInfo->ID} and locale = '{$locale}'");   
   }
 
+  /**
+   * add_translation 
+   * 
+   * @param array $new_fields 
+   * @param string $locale 
+   * @access public
+   * @return void
+   */
   public function add_translation($new_fields, $locale) {
     $insertValues = "";
     $new_fields['locale'] = $locale;
@@ -621,22 +687,87 @@ class PorkRecord extends dbObject {
     }
   }
 
+  /**
+   * destroy_translations 
+   * 
+   * @access protected
+   * @return void
+   */
   protected function destroy_translations() {
     dbConnection::getInstance($this->databaseInfo->connection)->query("delete from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}");
   }
 
+  /**
+   * destroy_sti_parent 
+   * 
+   * @access protected
+   * @return void
+   */
   protected function destroy_sti_parent() {
     if($this->parent_object) {
       $this->parent_object->destroy();
     }
   }
 
+  /**
+   * destroy 
+   * 
+   * @access public
+   * @return void
+   */
   public function destroy() {
     if($this->has_translation()) {
       $this->destroy_translations();
     }
     $this->destroy_sti_parent();
     $this->deleteYourSelf();
+  }
+
+
+  /**
+   * CALLBACKS
+   */
+
+  /**
+   * after_save 
+   * 
+   * @param mixed $callback 
+   * @access protected
+   * @return void
+   */
+  protected function after_save($callback) {
+    if(is_array($callback)) {
+      $this->after_save_observers = array_merge($this->after_save_observers, $callback);
+    } elseif(is_string($callback)) {
+      $this->after_save_observers[] = $callback;
+    }
+  }
+
+  /**
+   * before_save 
+   * 
+   * @param mixed $callback 
+   * @access protected
+   * @return void
+   */
+  protected function before_save($callback) {
+    if(is_array($callback)) {
+      $this->before_save_observers = array_merge($this->before_save_observers, $callback);
+    } elseif(is_string($callback)) {
+      $this->before_save_observers[] = $callback;
+    }
+  }
+
+  /**
+   * add_file_observer 
+   * 
+   * @param string $property 
+   * @param string $callback 
+   * @access protected
+   * @return void
+   */
+  protected function add_file_observer($property, $callback) {
+    $this->file_observers[$property] = $callback;
   }
 
   /**

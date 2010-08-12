@@ -222,6 +222,10 @@ class Controller {
 
   /* Helper methods */
 
+  protected function h($str) {
+    return htmlspecialchars($str, ENT_QUOTES);
+  }
+
   /**
    * link_to 
    * Generates link tag

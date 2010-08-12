@@ -131,8 +131,13 @@ class Form {
    * @access public
    * @return string
    */
-  static public function text_field_tag($object, $field) {
-    return "<input type='text' class='text' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='{$object->$field}' />";
+  static public function text_field_tag($object, $field, $safe = true) {
+    if($safe) {
+      $input_val = htmlspecialchars($object->$field, ENT_QUOTES);
+    } else {
+      $input_val = $object->$field;
+    }
+    return "<input type='text' class='text' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='{$input_val}' />";
   }
 
   /**
@@ -359,8 +364,8 @@ class Form {
    * @access public
    * @return string
    */
-  public function text_field($field) {
-    return self::text_field_tag($this->object, $field);
+  public function text_field($field, $safe = true) {
+    return self::text_field_tag($this->object, $field, $safe);
   }
 
   /**

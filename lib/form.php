@@ -127,6 +127,7 @@ class Form {
    * 
    * @param PorkRecord $object 
    * @param string $field 
+   * @param boolean $safe 
    * @static
    * @access public
    * @return string
@@ -138,6 +139,30 @@ class Form {
       $input_val = $object->$field;
     }
     return "<input type='text' class='text' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='{$input_val}' />";
+  }
+
+  /**
+   * textarea_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @param array $options 
+   * @param boolean $safe 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function textarea_tag($object, $field, $options = array(), $safe = false) {
+    if($safe) {
+      $input_val = htmlspecialchars($object->$field, ENT_QUOTES);
+    } else {
+      $input_val = $object->$field;
+    }
+    $attrs = "";
+    foreach ($options as $key => $opt) {
+      $attrs .= " {$key} = '{$opt}'";
+    }
+    return "<textarea name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}'{$attrs}>\n{$input_val}\n</textarea>";
   }
 
   /**
@@ -361,11 +386,25 @@ class Form {
    * text_field 
    * 
    * @param string $field 
+   * @param boolean $safe 
    * @access public
    * @return string
    */
   public function text_field($field, $safe = true) {
     return self::text_field_tag($this->object, $field, $safe);
+  }
+
+  /**
+   * textarea 
+   * 
+   * @param string $field 
+   * @param array $options 
+   * @param boolean $safe 
+   * @access public
+   * @return string
+   */
+  public function textarea($field, $options = array(), $safe = false) {
+    return self::textarea_tag($this->object, $field, $options, $safe);
   }
 
   /**

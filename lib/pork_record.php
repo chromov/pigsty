@@ -156,7 +156,7 @@ class PorkRecord extends dbObject {
   public function __set($property, $value) {
     if(is_array($value)) {
       if(isset($value['year']) || isset($value['min'])) {
-        $time = mktime($value['hour'], $value['min'], 0, $value['month'], $value['day'], $value['year']);
+        $time = mktime($value['hours'], $value['min'], 0, $value['month'], $value['day'], $value['year']);
         $value = date('Y-m-d H:i:s', $time);
       } else {
         $value = implode(', ', $value);

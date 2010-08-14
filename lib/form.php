@@ -194,8 +194,6 @@ class Form {
   static public function date_input_tag($resource, $field_name, $date = NULL, $has_empty = false, $start_year = "1950", $end_year = "2050") {
     if ($date == NULL) {
       $date = date("d-m-Y");
-    } else {
-      $has_empty = false;
     }
     $date_arr = getdate(strtotime($date));
     $output = '<select class="date_input" id="'.$resource.'_'.$field_name.'" name="'.$resource.'['.$field_name.'][day]">';
@@ -224,6 +222,40 @@ class Form {
   }
 
   /**
+   * date_input_tag 
+   * 
+   * @param string $resource 
+   * @param string $field_name 
+   * @param string $time 
+   * @param boolean $has_empty 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function time_input_tag($resource, $field_name, $date = NULL, $has_empty = false) {
+    if ($date == NULL) {
+      $date = date("d-m-Y H:i");
+    }
+    $date_arr = getdate(strtotime($date));
+    $output = '<select id="'.$resource.'_'.$field_name.'" name="'.$resource.'['.$field_name.'][hours]">';
+    if ($has_empty) $output .= '<option value="0">--</option>';
+    for($h = 0; $h <= 23; $h++) {
+      $output .= '<option ';
+      if(!$has_empty && ($date_arr['hours'] == $h)) $output .= 'selected="selected" ';
+      $output .= 'value="'.$h.'">'.sprintf("%02d",$h).'</option>';
+    }
+    $output .= '</select><select name="'.$resource.'['.$field_name.'][min]">';
+    if ($has_empty) $output .= '<option value="0">----</option>';
+    for($m = 0; $m <= 59; $m++) {
+      $output .= '<option ';
+      if(!$has_empty && ($date_arr['minutes'] == $m)) $output .= 'selected="selected" ';
+      $output .= 'value="'.$m.'">'.sprintf("%02d",$m).'</option>';
+    }
+    $output .= '</select>';
+    return $output;
+  }
+
+  /**
    * date_select_tag 
    * 
    * @param PorkRecord $object 
@@ -236,7 +268,23 @@ class Form {
    * @return string
    */
   static public function date_select_tag($object, $field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
-    return self::date_input_tag($object->resource(), $field, $object->$field, $has_empty = false, $start_year, $end_year);
+    return self::date_input_tag($object->resource(), $field, $object->$field, $has_empty, $start_year, $end_year);
+  }
+
+  /**
+   * datetime_select_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @param boolean $has_empty 
+   * @param string $start_year 
+   * @param string $end_year 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function datetime_select_tag($object, $field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
+    return self::time_input_tag($object->resource(), $field, $object->$field, $has_empty)."<span>&nbsp;</span>".self::date_input_tag($object->resource(), $field, $object->$field, $has_empty, $start_year, $end_year);
   }
 
   /**
@@ -379,7 +427,21 @@ class Form {
    * @return string
    */
   public function date_select($field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
-    return self::date_select_tag($this->object, $field, $has_empty = false, $start_year, $end_year);
+    return self::date_select_tag($this->object, $field, $has_empty, $start_year, $end_year);
+  }
+
+  /**
+   * datetime_select 
+   * 
+   * @param string $field 
+   * @param boolean $has_empty 
+   * @param string $start_year 
+   * @param string $end_year 
+   * @access public
+   * @return string
+   */
+  public function datetime_select($field, $has_empty = false, $start_year = "1950", $end_year = "2050") {
+    return self::datetime_select_tag($this->object, $field, $has_empty, $start_year, $end_year);
   }
 
   /**

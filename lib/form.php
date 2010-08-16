@@ -195,26 +195,26 @@ class Form {
     if ($date == NULL) {
       $date = date("d-m-Y");
     }
-    $date_arr = getdate(strtotime($date));
+    $date_arr = date_parse($date);
     $output = '<select class="date_input" id="'.$resource.'_'.$field_name.'" name="'.$resource.'['.$field_name.'][day]">';
     if ($has_empty) $output .= '<option value="0">--</option>';
     for($d = 1; $d <= 31; $d++) {
       $output .= '<option ';
-      if(!$has_empty && ($date_arr['mday'] == $d)) $output .= 'selected="selected" ';
+      if($date_arr['day'] == $d) $output .= 'selected="selected" ';
       $output .= 'value="'.$d.'">'.sprintf("%02d",$d).'</option>';
     }
     $output .= '</select><select name="'.$resource.'['.$field_name.'][month]">';
     if ($has_empty) $output .= '<option value="0">--</option>';
     for($m = 1; $m <= 12; $m++) {
       $output .= '<option ';
-      if(!$has_empty && ($date_arr['mon'] == $m)) $output .= 'selected="selected" ';
+      if($date_arr['month'] == $m) $output .= 'selected="selected" ';
       $output .= 'value="'.$m.'">'.sprintf("%02d",$m).'</option>';
     }
     $output .= '</select><select name="'.$resource.'['.$field_name.'][year]">';
     if ($has_empty) $output .= '<option value="0">----</option>';
     for($y = (int)$start_year; $y <= (int)$end_year; $y++) {
       $output .= '<option ';
-      if(!$has_empty && ($date_arr['year'] == $y)) $output .= 'selected="selected" ';
+      if($date_arr['year'] == $y) $output .= 'selected="selected" ';
       $output .= 'value="'.$y.'">'.$y.'</option>';
     }
     $output .= '</select>';
@@ -241,14 +241,14 @@ class Form {
     if ($has_empty) $output .= '<option value="0">--</option>';
     for($h = 0; $h <= 23; $h++) {
       $output .= '<option ';
-      if(!$has_empty && ($date_arr['hours'] == $h)) $output .= 'selected="selected" ';
+      if($date_arr['hours'] == $h) $output .= 'selected="selected" ';
       $output .= 'value="'.$h.'">'.sprintf("%02d",$h).'</option>';
     }
     $output .= '</select><select name="'.$resource.'['.$field_name.'][min]">';
     if ($has_empty) $output .= '<option value="0">----</option>';
     for($m = 0; $m <= 59; $m++) {
       $output .= '<option ';
-      if(!$has_empty && ($date_arr['minutes'] == $m)) $output .= 'selected="selected" ';
+      if($date_arr['minutes'] == $m) $output .= 'selected="selected" ';
       $output .= 'value="'.$m.'">'.sprintf("%02d",$m).'</option>';
     }
     $output .= '</select>';

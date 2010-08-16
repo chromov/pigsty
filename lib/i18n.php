@@ -43,6 +43,40 @@ class I18n {
   public static $default_locale = "ua";
 
   /**
+   * months 
+   * 
+   * @static
+   * @var array
+   * @access private
+   */
+  private static $months = array( 
+    'ru' => array(
+      'cr' => array('', 'Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'),
+      'sr' => array('', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'),
+      'c' => array('', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'),
+      's' => array('', 'январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь')
+    ),
+    'ua' => array(
+      'cr' => array('', 'Січня', 'Лютого', 'Березня', 'Квітня', 'Травня', 'Червня', 'Липня', 'Серпня', 'Вересня', 'Жовтня', 'Листопада', 'Грудня'),
+      'sr' => array('', 'січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'),
+      'c' => array('', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'),
+      's' => array('', 'січень', 'лютий', 'березень', 'квітень', 'травень', 'червень', 'липень', 'серпень', 'вересень', 'жовтень', 'листопад', 'грудень')
+    )
+  );
+
+  /**
+   * year_signs 
+   * 
+   * @static
+   * @var array
+   * @access private
+   */
+  private static $year_signs = array(
+    'ru' => array('cr' => 'Года', 'sr' => 'года', 'c' => 'Год', 's' => 'год'),
+    'ua' => array('cr' => 'Року', 'sr' => 'року', 'c' => 'Рік', 's' => 'рік')
+  );
+
+  /**
    * active 
    * 
    * @static
@@ -72,6 +106,39 @@ class I18n {
    */
   public function set_fallbacks($fallbacks) {
     self::$fallbacks = $fallbacks;
+  }
+
+  /**
+   * get_month_name 
+   * 
+   * @param string $mon 
+   * @param array $options 
+   * @static
+   * @access public
+   * @return string
+   */
+  public static function get_month_name($mon, $options = array()) {
+    $key = '';
+    if(in_array('capital', $options)) $key.='c';
+    if(in_array('small', $options)) $key.='s';
+    if(in_array('related', $options)) $key.='r';
+    return self::$months[self::get_locale()][$key][$mon];
+  }
+
+  /**
+   * get_year_sign 
+   * 
+   * @param array $options 
+   * @static
+   * @access public
+   * @return string
+   */
+  public static function get_year_sign($options = array()) {
+    $key = '';
+    if(in_array('capital', $options)) $key.='c';
+    if(in_array('small', $options)) $key.='s';
+    if(in_array('related', $options)) $key.='r';
+    return self::$year_signs[self::get_locale()][$key];
   }
 
   /**

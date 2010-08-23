@@ -24,6 +24,18 @@ class Utils {
   }
 
   /**
+   * caps_to_underscores 
+   * 
+   * @param string $string 
+   * @static
+   * @access public
+   * @return string
+   */
+  public static function caps_to_underscores($string) {
+    return join('_', explode(' ', strtolower(trim(preg_replace('/[A-Z]/', ' $0', $string)))));
+  }
+
+  /**
    * first_caps 
    * 
    * @param string $input 

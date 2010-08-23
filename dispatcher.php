@@ -34,6 +34,8 @@
     }
     $__params = array_merge_recursive($files, $__params);
 
+    array_walk(glob('./mailer/controllers/*.php'),create_function('$v,$i', 'return require_once($v);')); 
+
     require_once("./controllers/root_controller.php");
     require_once("./controllers/facets/".$__params['facet']."_controller.php");
     require_once("./facets/".$__params['facet']."/modules/".$__params['module']."/controllers/".$__params['controller']."_controller.php");

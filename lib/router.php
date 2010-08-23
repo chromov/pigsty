@@ -418,6 +418,11 @@ class Router {
       return "";
     }
   }
+
+  public function url_to($route_name, $fixed_params=array(), $query_params=array()) { 
+    return "http://{$_SERVER['SERVER_NAME']}".$this->path_to($route_name, $fixed_params, $query_params);
+  }
+
 }
 
 ?>

@@ -122,7 +122,7 @@ class Router {
     }
     $ul_routes = array();
     foreach ($got_routes as $route_name => $route_body) {
-      if(!$facet_body['default']) {
+      if(!isset($facet_body['default']) || (isset($facet_body['default']) && $facet_body['default'] !== true)) {
         $route_body['route'] = $route_body['route'] == "" ? $facet_name : $facet_name."/".$route_body['route'];
       } else {
         $this->default_facet = $facet_name;
@@ -154,7 +154,7 @@ class Router {
   private function parse_module($module_body, $module_name) {
     $got_routes = array();
     foreach ($module_body as $record_name => $record_body) {
-      if ($record_body['type'] == "resource") {
+      if (isset($record_body['type']) && $record_body['type'] == "resource") {
         $got_routes += $this->parse_resource($record_body, $record_name);
       } else {
         $got_routes += array($record_name => $record_body);
@@ -197,7 +197,7 @@ class Router {
         }
 
         $res_action_name = $action == "index" ? $res_name : $action."_".Inflect::singularize($res_name);
-        if(!$res_route['default']) {
+        if(!isset($res_route['default']) || (isset($res_route['default']) && $res_route['default'] !== true)) {
           $route_val = $route_val == "" ? $res_name : $res_name."/".$route_val;
         }
         $new_route[$res_action_name] = array(
@@ -229,11 +229,11 @@ class Router {
       }
     }
 
-    if(is_array($res_route['nested'])) {
+    if(isset($res_route['nested']) && is_array($res_route['nested'])) {
       foreach ($res_route['nested'] as $nested_name => $nested_route) {
         $got_nested_routes = $this->parse_resource($nested_route, $nested_name, $res_name);
         foreach ($got_nested_routes as $key_route => $val_route) {
-          if(!$res_route['default']) {
+          if(!isset($res_route['default']) || (isset($res_route['default']) && $res_route['default'] !== true)) {
             $val_route['route'] = $res_name."/".$val_route['route'];
           }
           $got_routes[$key_route] = $val_route;

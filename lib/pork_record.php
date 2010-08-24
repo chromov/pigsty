@@ -109,9 +109,9 @@ class PorkRecord extends dbObject {
   public function __call($name, $args) {
     $class_name = Utils::classify($name);
     if($class_name && array_key_exists($class_name, $this->relations)) {
-      $filters = $args[0] ? $args[0] : array();
-      $extra = $args[1] ? $args[1] : array();
-      $just_these = $args[2] ? $args[2] : array();
+      $filters = isset($args[0]) ? $args[0] : array();
+      $extra = isset($args[1]) ? $args[1] : array();
+      $just_these = isset($args[2]) ? $args[2] : array();
       if($this->ID != false) {
         $filters["ID"] = $this->ID;
         $filters = array(get_class($this) => $filters);	
@@ -161,7 +161,7 @@ class PorkRecord extends dbObject {
         $value = implode(', ', $value);
       }
     }
-    if(get_class($value) == "File") { 
+    if(is_object($value) && (get_class($value) == "File")) { 
       if(array_key_exists($property, $this->file_observers)) {
         call_user_func(array($this, $this->file_observers[$property]), $value);
       } elseif(($parent = $this->get_parent_object()) && (array_key_exists($property, $parent->file_observers))) {
@@ -232,7 +232,7 @@ class PorkRecord extends dbObject {
   static public function find_count($filters=array(), $extra=array(), $justThese= array()) {
     $class_name = get_called_class();
     $obj = new $class_name();
-    return($obj->find_count_by_class_name($class_name, $filters, $extra, $just_these));
+    return($obj->find_count_by_class_name($class_name, $filters, $extra, $justThese));
   }
 
   /**
@@ -495,7 +495,9 @@ class PorkRecord extends dbObject {
     foreach ($this->before_save_observers as $bs) {
       call_user_func(array($this, $bs));
     }
-    call_user_func(array($this, $this->file_observers[$property]), $value);
+    if(isset($this->file_observers[$property])) {
+      call_user_func(array($this, $this->file_observers[$property]), $value);
+    }
     $ret = false;
 		if($this->databaseInfo->ID == false) { // it's a new record for the db
       $this->touch_datetime_field('created_at');

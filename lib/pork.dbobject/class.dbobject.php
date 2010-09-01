@@ -558,7 +558,7 @@ class dbObject
 		$class = new $className();
 		if($class instanceOf dbObject)
 		{
-			return($class->Find($className, $filters, $extra, $justThese));
+			return($class->_Find($className, $filters, $extra, $justThese));
 		}
 	}
 

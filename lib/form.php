@@ -297,8 +297,8 @@ class Form {
    * @access public
    * @return string
    */
-  static public function select_tag($object, $field, $option_tags) {
-    $output = "<select name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}'>\n";
+  static public function select_tag($object, $field, $option_tags, $select_many = false) {
+    $output = "<select name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}'".($select_many ? " class='select_many'" : '').">\n";
     $output .= $option_tags;
     $output .= "</select>\n";
     return $output;
@@ -390,6 +390,39 @@ class Form {
       $output .= "<option value='{$object->$value_property}'".($this->object->$field == $object->$value_property ? " selected='selected'" : "").">{$object->$text_property}</option>\n";
     }
     return self::select_tag($this->object, $field, $output);
+  }
+
+  /**
+   * select_many 
+   * 
+   * @param string $relation 
+   * @param string $text_property 
+   * @param string $empty_option 
+   * @access public
+   * @return string
+   */
+  public function select_many($relation, $text_property = "name", $empty_option = "-----") {
+    $class_name = Utils::classify($relation);
+    if(!class_exists($class_name)) return "Wrong relation name!";
+
+    $collection = $class_name::find();
+    if(!$this->object->is_new_record()) {
+      $current = $this->object->$relation();
+      $collection = array_diff($collection, $current);
+    }
+
+    $output = "<option value=''>".$empty_option."</option>";
+    foreach($collection as $object) {
+      $output .= "<option value='{$object->ID}'>{$object->$text_property}</option>\n";
+    }
+
+    $current_options = "";
+    foreach($current as $c_opt) {
+      $current_options .= "<div class='select_many_check' id='{$this->object->resource()}_{$relation}_{$c_opt->ID}'><input type='checkbox' value='{$c_opt->ID}' checked='checked' name='{$this->object->resource()}[{$relation}][]' class='{$this->object->resource()}_{$relation}' /><span>{$c_opt->$text_property}</span></div>\n";
+    }
+    $select = self::select_tag($this->object, $relation, $output, true);
+
+    return $select.$current_options;
   }
 
   /**

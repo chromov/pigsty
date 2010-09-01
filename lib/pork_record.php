@@ -7,6 +7,8 @@ require_once "lib/pork.dbobject/class.logger.php";
 
 class PorkRecord extends dbObject {
 
+  private $pre_saved_relations = array();
+
   /**
    * translated_fields 
    * 
@@ -157,6 +159,9 @@ class PorkRecord extends dbObject {
     if(is_array($value)) {
       if(isset($value['year']) || isset($value['min'])) {
         $value = sprintf("%04d-%02d-%02d %02d:%02d", $value['year'], $value['month'], $value['day'], $value['hours'], $value['min']);
+      } elseif(($class_name = Utils::classify($property)) && array_key_exists($class_name, $this->relations)) {
+        $this->pre_saved_relations[$class_name] = $value;
+        return;
       } else {
         $value = implode(', ', $value);
       }
@@ -187,6 +192,12 @@ class PorkRecord extends dbObject {
       return $this->parent_object->__get($property);
     }
     return false;
+  }
+
+  public function __tostring() {
+    if(!$this->is_new_record()) {
+      return (string) $this->ID;
+    }
   }
 
   /**
@@ -543,6 +554,36 @@ class PorkRecord extends dbObject {
     if($ret) {
       foreach ($this->after_save_observers as $as) {
         call_user_func(array($this, $as));
+      }
+      foreach($this->pre_saved_relations as $class_name => $val) {
+        if($this->relations[$class_name]->relationType == RELATION_NOT_ANALYZED) {
+					$this->analyzeRelations();
+        }
+        switch($this->relations[$class_name]->relationType) {
+        case RELATION_MANY:
+					$conn_class = $this->relations[$class_name]->connectorClass;
+          $object = new $class_name;
+          $results = $this->find_by_class_name($class_name, array(get_class($this) => array("ID" => $this->ID)), array(), array($object->databaseInfo->primary));
+          $cur_ids = array_map(create_function('$obj', 'return $obj->ID;'), $results);
+          if(is_array($val)) {
+            $ids_to_del = array_diff($cur_ids, $val);
+            $ids_to_add = array_diff($val, $cur_ids);
+            foreach($ids_to_del as $del_id) {
+              $this->disconnect($class_name, $del_id);
+            }
+            foreach($ids_to_add as $rel) {
+              if(is_string($rel)) {
+                $connector = new $conn_class(false);
+                $property = $connector->databaseInfo->fields[$this->databaseInfo->primary];
+                $connector->$property = $this->databaseInfo->ID;
+                $property = $connector->databaseInfo->fields[$object->databaseInfo->primary];
+                $connector->$property = $rel;
+                $connector->save();
+              }
+            }
+          }
+          break;
+        }
       }
       return $ret;
     }

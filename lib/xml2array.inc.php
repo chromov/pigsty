@@ -7,15 +7,7 @@ function xml2array($url, $get_attributes = 1, $priority = 'tag')
         return array ();
     }
     $parser = xml_parser_create('');
-    if (!($fp = @ fopen($url, 'rb')))
-    {
-        return array ();
-    }
-    while (!feof($fp))
-    {
-        $contents .= fread($fp, 8192);
-    }
-    fclose($fp);
+    $contents = file_get_contents($url);
     xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "UTF-8");
     xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);

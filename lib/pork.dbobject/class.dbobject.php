@@ -692,8 +692,8 @@ class QueryBuilder
 
 		if($wtclass instanceof dbObject && is_array($value)) {  // filter by a property of a subclass
 			foreach($value as $key=>$val) {
-				$this->buildFilters($key, $val, $wtclass);
 				$this->buildJoins($wtclass,$class);
+				$this->buildFilters($key, $val, $wtclass);
 			}	
 		}
 		elseif(is_numeric($what)) { // it's a custom whereclause (not just $field=>$value)		

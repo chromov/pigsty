@@ -417,8 +417,10 @@ class Form {
     }
 
     $current_options = "";
-    foreach($current as $c_opt) {
-      $current_options .= "<div class='select_many_check' id='{$this->object->resource()}_{$relation}_{$c_opt->ID}'><input type='checkbox' value='{$c_opt->ID}' checked='checked' name='{$this->object->resource()}[{$relation}][]' class='{$this->object->resource()}_{$relation}' /><span>{$c_opt->$text_property}</span></div>\n";
+    if(isset($current)) {
+      foreach($current as $c_opt) {
+        $current_options .= "<div class='select_many_check' id='{$this->object->resource()}_{$relation}_{$c_opt->ID}'><input type='checkbox' value='{$c_opt->ID}' checked='checked' name='{$this->object->resource()}[{$relation}][]' class='{$this->object->resource()}_{$relation}' /><span>{$c_opt->$text_property}</span></div>\n";
+      }
     }
     $select = self::select_tag($this->object, $relation, $output, true);
 

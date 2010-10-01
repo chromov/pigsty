@@ -405,7 +405,7 @@ class Form {
     $class_name = Utils::classify($relation);
     if(!class_exists($class_name)) return "Wrong relation name!";
 
-    $collection = $class_name::find();
+    $collection = $this->object->find_by_class_name($class_name);
     if(!$this->object->is_new_record()) {
       $current = $this->object->$relation();
       $collection = array_diff($collection, $current);

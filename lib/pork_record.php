@@ -25,6 +25,23 @@ class PorkRecord extends dbObject {
    */
   private $parent_object;
 
+
+  /**
+   * lazy_model_attributes 
+   * 
+   * @var array
+   * @access private
+   */
+  private $lazy_model_attributes = array();
+
+  /**
+   * lazy_translation_attributes 
+   * 
+   * @var array
+   * @access private
+   */
+  private $lazy_translation_attributes = array();
+
   /**
    * file_observers 
    * 
@@ -186,6 +203,9 @@ class PorkRecord extends dbObject {
 
   public function __get($property) { 
     if($this->hasProperty($property)) {
+      if($this->has_lazy_attribute($property)) {
+        $this->load_tranlations($property);
+      }
       $pg = parent::__get($property);
       return $pg;
     } elseif($property != 'ID' && $this->parent_object) {
@@ -700,15 +720,25 @@ class PorkRecord extends dbObject {
    * @access private
    * @return void
    */
-  protected function load_tranlations() {
+  protected function load_tranlations($lazy_attr = NULL) {
     if($this->parent_object) {
-      $this->parent_object->load_tranlations();
+      $this->parent_object->load_tranlations($lazy_attr);
     }
     if(sizeof($this->translated_fields) == 0) {
       return;
     }
-    $fieldnames = implode(",", array_keys($this->translated_fields));
-    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select * from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}", 'assoc');
+    $valid_fields = array();
+    if($lazy_attr) {
+      $valid_fields[] = $lazy_attr;
+    } else {
+      if(sizeof($this->lazy_translation_attributes) > 0) {
+        $valid_fields = array_diff($this->translated_fields, $this->lazy_translation_attributes);
+      } else {
+        $valid_fields = $this->translated_fields;
+      }
+    }
+    $fieldnames = implode(",", $valid_fields);
+    $values = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll("select locale, {$fieldnames} from {$this->databaseInfo->table}_translations where id_parent = {$this->databaseInfo->ID}", 'assoc');
 
     if($values != false && sizeof($values) > 0) {
       foreach ($values as $row) {
@@ -721,12 +751,33 @@ class PorkRecord extends dbObject {
       $translated_fields = array();
       if ($locale != "") {
         $desired_row = $translations[$locale];
-        foreach ($this->translated_fields as $field) {
+        foreach ($valid_fields as $field) {
           $translated_fields[$field] = $desired_row[$field];
         }
       }
       $this->databaseValues = array_merge($this->databaseValues, $translated_fields);
     }
+  }
+
+  /**
+   * lazy_attributes 
+   * 
+   * @param array $attrs 
+   * @access protected
+   * @return void
+   */
+  protected function lazy_attributes($attrs) {
+    foreach($attrs as $attr) {
+      if($this->translates_field($attr)) {
+        $this->lazy_translation_attributes[] = $attr;
+      } else {
+        $this->lazy_attributes[] = $attr;
+      }
+    }
+  }
+
+  private function has_lazy_attribute($property) {
+    return((array_search($property, $this->lazy_model_attributes) !== false) || (array_search($property, $this->lazy_translation_attributes) !== false));
   }
 
   /**

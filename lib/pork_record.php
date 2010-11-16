@@ -323,6 +323,21 @@ class PorkRecord extends dbObject {
   }
 
   /**
+   * reload 
+   * 
+   * @access public
+   * @return void
+   */
+  public function reload() {
+    $filters = array($this->databaseInfo->primary => $this->ID);
+    $builder = new QueryBuilder(get_class($this), $filters);
+    $input = dbConnection::getInstance($this->databaseInfo->connection)->fetchAll($builder->buildQuery(), 'assoc');
+    $this->import($input[0]);
+    $this->translated_fields = array();
+    $this->load_tranlations();
+  }
+
+  /**
    * find_sti_child 
    * 
    * @access private

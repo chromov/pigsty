@@ -349,7 +349,7 @@ class Router {
     } else {
       $res = $route;
     }
-    return "/^".addcslashes($res, "/")."$/";
+    return "/^".addcslashes($res, "./")."$/";
   }
 
   /**

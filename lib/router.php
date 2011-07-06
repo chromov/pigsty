@@ -161,7 +161,13 @@ class Router {
       }
     }
     foreach ($got_routes as $route_name => $route_body) {
-      $route_body['route'] = $route_body['route'] == "" ? $module_name : $module_name."/".$route_body['route'];
+      if(isset($route_body['prefix'])) {
+        if(!empty($route_body['prefix'])) {
+          $route_body['route'] = $route_body['prefix']."/".$route_body['route'];
+        }
+      } else {
+        $route_body['route'] = $route_body['route'] == "" ? $module_name : $module_name."/".$route_body['route'];
+      }
       $route_body['module'] = $module_name;
       $got_routes[$route_name] = $route_body;
     }

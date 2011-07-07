@@ -35,6 +35,22 @@ class PorkRecord extends dbObject {
   private $lazy_model_attributes = array();
 
   /**
+   * validations 
+   * 
+   * @var array
+   * @access private
+   */
+  private $validations = array();
+
+  /**
+   * errors 
+   * 
+   * @var array
+   * @access private
+   */
+  private $errors = array();
+
+  /**
    * lazy_translation_attributes 
    * 
    * @var array
@@ -93,6 +109,16 @@ class PorkRecord extends dbObject {
    */
   public function get_parent_object() {
     return $this->parent_object;
+  }
+
+  /**
+   * get_errors 
+   * 
+   * @access public
+   * @return array
+   */
+  public function get_errors() {
+    return $this->errors;
   }
 
   /**
@@ -538,11 +564,12 @@ class PorkRecord extends dbObject {
    * @return mixed
    */
   public function save() {
+    $valid = $this->validate();
+    if(!$valid) {
+      return false;
+    }
     foreach ($this->before_save_observers as $bs) {
       call_user_func(array($this, $bs));
-    }
-    if(isset($this->file_observers[$property])) {
-      call_user_func(array($this, $this->file_observers[$property]), $value);
     }
     $ret = false;
 		if($this->databaseInfo->ID == false) { // it's a new record for the db
@@ -793,6 +820,72 @@ class PorkRecord extends dbObject {
 
   private function has_lazy_attribute($property) {
     return((array_search($property, $this->lazy_model_attributes) !== false) || (array_search($property, $this->lazy_translation_attributes) !== false));
+  }
+
+
+  /**
+   * validate 
+   * 
+   * @access private
+   * @return boolean
+   */
+  private function validate() {
+    if(sizeof($this->validations) > 0) {
+      $this->errors = array();
+      foreach($this->validations as $property => $whens) {
+        $value = $this->$property;
+        $callbacks = $whens['all'];
+        if($this->is_new_record()) {
+          $callbacks = array_merge($callbacks, $whens['create']);
+        } else {
+          $callbacks = array_merge($callbacks, $whens['update']);
+        }
+        foreach($callbacks as $callback){
+          $msg = $callback($value);
+          if($msg != '') {
+            if(!isset($this->errors[$property])) {
+              $this->errors[$property] = array();
+            }
+            $this->errors[$property][] = $msg;
+          }
+        }
+      }
+      if(sizeof($this->errors) > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public function is_valid() {
+    return $this->validate(); 
+  }
+
+  /**
+   * validates_presence_of 
+   * 
+   * @param string $field_name 
+   * @param string $msg 
+   * @access protected
+   * @return void
+   */
+  protected function validates_presence_of($field_name, $options = array()) {
+    $def_options = array("msg" => "Не может быть пустым", "on" => "all");
+    $options = array_merge($def_options, $options);
+    $msg = $options["msg"];
+    $callback = false;
+    if($this->hasProperty($field_name)) {
+      $callback = create_function('$value', 'if(empty($value)) return "'.$msg.'"; else return "";');
+    }
+    if(array_key_exists($field_name, $this->file_observers)){
+      $callback = create_function('$value', 'if(empty($value)||($value->error != "0")) return "'.$msg.'"; else return "";');
+    }
+    if($callback) {
+      if(!isset($this->validations[$field_name])) {
+        $this->validations[$field_name] = array("create" => array(), "update" => array(), "all" => array());
+      }
+      $this->validations[$field_name][$options["on"]][] = $callback;
+    }
   }
 
   /**

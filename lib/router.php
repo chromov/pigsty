@@ -124,6 +124,8 @@ class Router {
     foreach ($got_routes as $route_name => $route_body) {
       if(!isset($facet_body['default']) || (isset($facet_body['default']) && $facet_body['default'] !== true)) {
         $route_body['route'] = $route_body['route'] == "" ? $facet_name : $facet_name."/".$route_body['route'];
+        unset($got_routes[$route_name]);
+        $route_name = $facet_name."_".$route_name;
       } else {
         $this->default_facet = $facet_name;
       }

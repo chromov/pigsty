@@ -427,6 +427,34 @@ class Router {
     }
   }
 
+  public function form_path($target) {
+    if(is_array($target)) {
+      $res_parts = array();
+      $res_params = array();
+      foreach($target as $part) {
+        if(is_string($part)) {
+          $res_parts[] = $part;
+        } else {
+          $params = each($this->path_for_form_resource($part));
+          $res_parts[] = $params[0];
+          $res_params = $params[1];
+        }
+      }
+      return $this->path_to(join("_", $res_parts), $res_params);
+    } else {
+      $params = each($this->path_for_form_resource($target));
+      return $this->path_to($params[0], $params[1]);
+    }
+  }
+
+  private function path_for_form_resource($obj) {
+    if($obj->is_new_record()) {
+      return array($obj->resources() => array());
+    } else {
+      return array("update_".$obj->resource() => array('id' => $obj->ID));
+    }
+  }
+
   public function url_to($route_name, $fixed_params=array(), $query_params=array()) { 
     return "http://{$_SERVER['SERVER_NAME']}".$this->path_to($route_name, $fixed_params, $query_params);
   }

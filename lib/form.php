@@ -43,6 +43,16 @@ class Form {
   private $object = null;
 
   /**
+   * get_object 
+   * 
+   * @access public
+   * @return PorkRecord
+   */
+  public function get_object() {
+    return $this->object;
+  }
+
+  /**
    * __construct 
    * 
    * @param mixed $object 
@@ -54,13 +64,9 @@ class Form {
    */
   public function __construct($object, $route_name = "", $fixed_params = array(), $method = "post", $options = array()) {
     $this->method = $method;
-    $this->object = $object;
-    if($route_name == "") { // guess route from the given $object
-      if($this->object->is_new_record()) {
-        $this->action = Router::load()->path_to($this->object->resources());
-      } else {
-        $this->action = Router::load()->path_to("update_".$this->object->resource(), array('id' => $this->object->ID));
-      }
+    $this->find_form_object($object);
+    if($route_name == "") {
+      $this->action = Router::load()->form_path($object);
     } else {
       $this->action = Router::load()->path_to($route_name, $fixed_params);
     }
@@ -68,6 +74,14 @@ class Form {
       $this->attrs .= " {$key} = '{$option}'";
     }
     ob_start();
+  }
+
+  private function find_form_object($obj) {
+    if(is_array($obj)) {
+      $this->object = $obj[1];
+    } else {
+      $this->object = $obj;
+    }
   }
 
 
@@ -367,8 +381,8 @@ class Form {
    */
   public function select($field, $options_array = array(), $options = array()) {
     $output = self::proceed_options($options);
-    foreach($options_array as $val => $key) {
-      $output .= "<option value='{$key}'".($this->object->$field == $object->$value_property ? " selected='selected'" : "").">{$val}</option>\n";
+    foreach($options_array as $key => $val) {
+      $output .= "<option value='{$key}'".($this->object->$field == $key ? " selected='selected'" : "").">{$val}</option>\n";
     }
     return self::select_tag($this->object, $field, $output);
   }

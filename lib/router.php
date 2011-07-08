@@ -117,7 +117,7 @@ class Router {
     if (array_key_exists('root', $facet_body)) {
       $route_body = $facet_body['root'];
       $route_body['facet'] = $facet_name;
-      $root = array($facet_name."_root" => $route_body);
+      $root = array("root" => $route_body);
       $got_routes += $root;
     }
     $ul_routes = array();

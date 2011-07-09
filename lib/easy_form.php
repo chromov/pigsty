@@ -28,7 +28,15 @@ class EasyForm {
    */
   public function __construct($object, $inputs) {
     $this->original_object = $object;
-    $this->form = new Form($object);
+    if(isset($inputs['path'])) {
+      if(is_array($inputs['path'])) {
+        $this->form = new Form($object, $inputs['path'][0], $inputs['path'][1]);
+      } else {
+        $this->form = new Form($object, $inputs['path']);
+      }
+    } else {
+      $this->form = new Form($object);
+    }
     $this->object = $this->form->get_object();
     $this->proceed_inputs($inputs);
     $this->form->end();
@@ -118,6 +126,11 @@ class EasyForm {
         $cancel_path = $this->original_object->resources();
       }
     }
+    if(isset($buttons['cancel_url'])) {
+      $cancel_url = $buttons['cancel_url'];
+    } else {
+      $cancel_url = Router::load()->path_to($cancel_path);
+    }
 
     $output = "<fieldset class=\"buttons\"><ol>";
 
@@ -126,7 +139,7 @@ class EasyForm {
     $output .= "</li>";
 
     $output .= "<li class=\"cancel\">";
-    $output .= "<a href=".Router::load()->path_to($cancel_path).">Отмена</a>";
+    $output .= "<a href=".$cancel_url.">Отмена</a>";
     $output .= "</li>";
 
     $output .= "</ol></fieldset>";

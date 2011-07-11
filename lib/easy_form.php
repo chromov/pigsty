@@ -67,13 +67,20 @@ class EasyForm {
       $type = $input_options[0];
       $label = $input_options[1];
       $output .= "<li class=\"".$type."\">";
-      $output .= $this->form->label($input_name, $label);
+      if($type != "boolean") {
+        $output .= $this->form->label($input_name, $label);
+      }
       switch($type) {
       case "string":
         $output .= $this->form->text_field($input_name);
         break;
       case "text":
         $output .= $this->form->textarea($input_name);
+        break;
+      case "boolean":
+        $output .= "<label for=\"{$this->object->resource()}_{$input_name}\">";
+        $output .= $this->form->checkbox($input_name);
+        $output .= "$label</label>";
         break;
       case "ckeditor":
         $output .= $this->form->textarea($input_name, array('class' => 'ckeditor'));

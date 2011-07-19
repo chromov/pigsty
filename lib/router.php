@@ -137,7 +137,7 @@ class Router {
           $ul_routes[$route_name."_unlocalized"] = $route_body;
           $ul_routes[$route_name."_unlocalized"]['route_name'] = $route_name."_unlocalized";
         }
-        $route_body['route'] = "{locale:str}/".$route_body['route'];
+        $route_body['route'] = "{locale:locale}/".$route_body['route'];
       }
 
       $got_routes[$route_name] = $route_body;
@@ -372,6 +372,9 @@ class Router {
       case "int":
         $regxp = "\d+";
         break;
+      case "locale":
+        $regxp = "ru|ua|en";
+        break;
       case "str":
         $regxp = "(\w|-)+";
         break;
@@ -401,13 +404,23 @@ class Router {
    */
   public function path_to($route_name, $fixed_params=array(), $query_params=array()) {
     if(isset($this->result_routes[$route_name])) {
-      if(!isset($fixed_params['locale'])) {
-        if(isset($this->result_parameters['locale'])) {
-          $fixed_params['locale'] = $this->result_parameters['locale'];
-        } else {
-          $fixed_params['locale'] = I18n::$default_locale;
+
+      if(I18n::get_active()) {
+        if(!isset($fixed_params['locale'])) {
+          if(isset($this->result_parameters['locale'])) {
+            $fixed_params['locale'] = $this->result_parameters['locale'];
+          } else {
+            if(self::$with_unlocalized) {
+              $route_name = $route_name."_unlocalized";
+            } else {
+              $fixed_params['locale'] = I18n::$default_locale;
+            }
+          }
+        } elseif(($matches = array()) || preg_match("/(\w+)_unlocalized/", $route_name, $matches)) {
+          $route_name = $matches[1];
         }
       }
+
       $route = $this->result_routes[$route_name]['route'];
       foreach ($fixed_params as $key => $value) {
         if(is_string($value) || is_int($value)) {

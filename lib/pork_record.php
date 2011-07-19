@@ -675,7 +675,7 @@ class PorkRecord extends dbObject {
    */
   public function touch_slug($property='name', $slug='slug') {
     if($this->hasProperty($property) && $this->hasProperty($slug)) {
-      if((array_search($property, $this->translated_fields) !== false) && I18n::get_active() && (I18n::get_locale() != I18n::$default_locale)) {
+      if((array_search($property, $this->translated_fields) !== false) && I18n::get_active() && ((I18n::get_locale() != I18n::$default_locale) && !I18n::get_localized_slug() )) {
         return $this;
       }
       $r_slug = Utils::slugify($this->$property);

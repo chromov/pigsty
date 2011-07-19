@@ -86,6 +86,15 @@ class I18n {
   private static $active = false;
 
   /**
+   * localized_slug 
+   * 
+   * @static
+   * @var boolean
+   * @access private
+   */
+  private static $localized_slug = false;
+
+  /**
    * set_translations 
    * 
    * @param array $translations 
@@ -188,6 +197,27 @@ class I18n {
    */
   public static function set_active($active) {
     self::$active = $active;
+  }
+
+  /**
+   * get_localized_slug 
+   * 
+   * @access public
+   * @return boolean
+   */
+  public function get_localized_slug() {
+    return self::$localized_slug; 
+  }
+
+  /**
+   * set_localized_slug 
+   * 
+   * @param boolean $new_val 
+   * @access public
+   * @return void
+   */
+  public function set_localized_slug($new_val) {
+    self::$localized_slug = $new_val;
   }
 
   /**

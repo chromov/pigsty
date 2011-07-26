@@ -841,7 +841,7 @@ class PorkRecord extends dbObject {
           $callbacks = array_merge($callbacks, $whens['update']);
         }
         foreach($callbacks as $callback){
-          $msg = $callback($value);
+          $msg = $callback($value, $this);
           if($msg != '') {
             if(!isset($this->errors[$property])) {
               $this->errors[$property] = array();
@@ -870,17 +870,32 @@ class PorkRecord extends dbObject {
    * @return void
    */
   protected function validates_presence_of($field_name, $options = array()) {
-    $def_options = array("msg" => "Не может быть пустым", "on" => "all");
+    $def_options = array("msg" => "Не может быть пустым", "on" => "all", "if_attrs" => array());
     $options = array_merge($def_options, $options);
     $msg = $options["msg"];
-    $callback = false;
+    $condition = false;
     if($this->hasProperty($field_name)) {
-      $callback = create_function('$value', 'if(empty($value)) return "'.$msg.'"; else return "";');
+      $condition = 'empty($value)';
     }
     if(array_key_exists($field_name, $this->file_observers)){
-      $callback = create_function('$value', 'if(empty($value)||($value->error != "0")) return "'.$msg.'"; else return "";');
+      $condition = '(empty($value)||($value->error != "0"))';
     }
-    if($callback) {
+    if($condition) {
+      $all_conditions = array($condition);
+      if(sizeof($options["if_attrs"]) > 0) {
+        foreach($options["if_attrs"] as $attr => $val) {
+          if(is_array($val)) {
+            $or_conds = array();
+            foreach($val as $or_val) {
+              $or_conds[] = '($obj->'.$attr.' == "'.$or_val.'")';
+            }
+            $all_conditions[] = "(".join(" || ", $or_conds).")";
+          } else {
+            $all_conditions[] = '($obj->'.$attr.' == "'.$val.'")';
+          }
+        }
+      }
+      $callback = create_function('$value, $obj', 'if('.join($all_conditions, " && ").') return "'.$msg.'"; else return "";');
       if(!isset($this->validations[$field_name])) {
         $this->validations[$field_name] = array("create" => array(), "update" => array(), "all" => array());
       }

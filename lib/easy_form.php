@@ -74,6 +74,9 @@ class EasyForm {
       case "string":
         $output .= $this->form->text_field($input_name);
         break;
+      case "password":
+        $output .= $this->form->password_field($input_name);
+        break;
       case "text":
         $output .= $this->form->textarea($input_name);
         break;

@@ -156,6 +156,19 @@ class Form {
   }
 
   /**
+   * password_field_tag 
+   * 
+   * @param PorkRecord $object 
+   * @param string $field 
+   * @static
+   * @access public
+   * @return string
+   */
+  static public function password_field_tag($object, $field) {
+    return "<input type='password' class='password' name='{$object->resource()}[{$field}]' id='{$object->resource()}_{$field}' value='{$input_val}' />";
+  }
+
+  /**
    * textarea_tag 
    * 
    * @param PorkRecord $object 
@@ -503,6 +516,17 @@ class Form {
    */
   public function text_field($field, $safe = true) {
     return self::text_field_tag($this->object, $field, $safe);
+  }
+
+  /**
+   * password_field 
+   * 
+   * @param string $field 
+   * @access public
+   * @return string
+   */
+  public function password_field($field) {
+    return self::password_field_tag($this->object, $field);
   }
 
   /**

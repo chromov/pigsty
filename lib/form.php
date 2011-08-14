@@ -462,7 +462,7 @@ class Form {
    * @access public
    * @return string
    */
-  public function hidden($field, $value) {
+  public function hidden($field, $value = NULL) {
     return self::hidden_tag($this->object, $field, $value);
   }
 
